@@ -119,12 +119,32 @@ public class Lane {
 	
 	public void printLane(){
 		Iterator<Sample> iSample = samples_.iterator();
+		System.out.printf("%d:", laneNumber_);
 		while(iSample.hasNext()){
 			Sample sample = iSample.next();
 			System.out.printf("[%s,%.2f] ",sample.Name(),sample.Reads());
 		}
-		System.out.println();
+//		System.out.println();
 		
+	}
+	
+	
+	public boolean isEmpty(){
+		return (samples_.size()==0);
+	}
+
+
+
+
+	public int numSamples() {
+		return samples_.size();
+	}
+
+
+
+
+	public ArrayList<Sample> getSamples() {
+		return samples_;
 	}
 	
 	

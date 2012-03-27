@@ -11,7 +11,7 @@ public class RandomShuffler {
 	public static boolean Shuffle(FlowCell fc) throws IOException{
 		//1) Check if flowcell is too full
 		if(fc.currentFillLevel() > fc.Capacity()){
-			System.out.printf("Shuffle failed: Flowcell too full (%.2f/%.2f, args)\n",fc.currentFillLevel(),fc.Capacity());
+			System.out.printf("Shuffle failed: Flowcell too full (%.2f/%.2f)\n",fc.currentFillLevel(),fc.Capacity());
 			return false;
 		}
 		
@@ -26,8 +26,8 @@ public class RandomShuffler {
 //			System.out.printf("OverFilled : %d\t%.2f\t(%.2f)\n",overFilled.get(o).LaneNumber(), overFilled.get(o).remainingCapacity(), overFilled.get(o).currentFillLevel());
 //		}
 
-		
-		final double FULL_THRESHOLD = 0.97;
+		double INIT_THRESHOLD = 0.99;
+		double FULL_THRESHOLD = INIT_THRESHOLD;
 		
 		int attempts =0;
 		while(overFilled.size()>0){
@@ -38,14 +38,27 @@ public class RandomShuffler {
 			//Grab random sample from 2 random lanes and swap
 			Lane lane1 = fc.Lane((int) (Math.random() * fc.NumLanes()));
 //			System.out.printf("Grabbed L1 as lane %d\t currentFill: %.2f\tremaining %.2f \tFull? %s\n",lane1.LaneNumber(), lane1.currentFillLevel(), lane1.remainingCapacity(), lane1.currentFillLevel() / lane1.Capacity()>FULL_THRESHOLD);
-			while((lane1.currentFillLevel() / lane1.Capacity() > FULL_THRESHOLD && lane1.remainingCapacity() >0 )|| lane1.remainingCapacity() >0){
+			double l1attempts=0;
+			while((lane1.currentFillLevel() / lane1.Capacity() >= FULL_THRESHOLD && lane1.remainingCapacity() >0 )|| lane1.remainingCapacity() >0){
+				if(++l1attempts==10){
+//					System.out.printf("%.3f\t%d\n",FULL_THRESHOLD,attempts);
+					FULL_THRESHOLD-=0.01;
+					l1attempts=0;
+				}
 				lane1 = fc.Lane((int) (Math.random() * fc.NumLanes()));
 //				System.out.printf("Grabbed L1 as lane %d\t currentFill: %.2f\tremaining %.2f \tFull? %s\n",lane1.LaneNumber(), lane1.currentFillLevel(), lane1.remainingCapacity(), lane1.currentFillLevel() / lane1.Capacity()>FULL_THRESHOLD);
 			}
 			
-			Lane lane2 = fc.Lane((int) (Math.random() * fc.NumLanes()));
+			FULL_THRESHOLD=INIT_THRESHOLD;
 			
-			while(lane2.LaneNumber()==lane1.LaneNumber() || lane2.currentFillLevel() / lane2.Capacity() > FULL_THRESHOLD){
+			Lane lane2 = fc.Lane((int) (Math.random() * fc.NumLanes()));
+			double l2attempts=0;
+			while(lane2.LaneNumber()==lane1.LaneNumber() || lane2.currentFillLevel() / lane2.Capacity() >= FULL_THRESHOLD){
+				if(++l2attempts==10){
+//					System.out.printf("%.3f\n",FULL_THRESHOLD);
+					FULL_THRESHOLD-=0.01;
+					l2attempts=0;
+				}
 				lane2 = fc.Lane((int) (Math.random() * fc.NumLanes()));
 			}
 			
@@ -92,6 +105,8 @@ public class RandomShuffler {
 //		System.out.println("DONE!");
 		return true;
 	}
+	
+
 	
 
 }
