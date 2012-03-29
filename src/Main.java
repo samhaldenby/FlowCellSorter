@@ -6,8 +6,8 @@ import java.util.Iterator;
 public class Main {
 
 	final static int NUM_OF_FCS=2;
-	final static double LANE_CAPACITY=1;
-	final static int REQUIRED_ITERATIONS=1000;
+	final static double LANE_CAPACITY=1.01;
+	final static int REQUIRED_ITERATIONS=10000;
 	static int TRIES_BEFORE_INCREASING_NUM_LANES = 30000;
 	/**
 	 * @param args
@@ -27,7 +27,7 @@ public class Main {
 		}
 		
 		//DEBUG - random samples
-		samples = SampleSheetRandomiser.create();
+//		samples = SampleSheetRandomiser.create();
 		
 	
 		
@@ -86,7 +86,7 @@ public class Main {
 //			}
 			
 			if(tries%10000==0){
-				System.out.printf("ATTEMPT: %d / %d / %d \n",iter-iterReducedBy,tries,totalTries);
+				System.out.printf("ATTEMPT: %d / %d / %d / initFail: %d / shuffleFail %d / failSwap %d / failDonate %d\n",iter-iterReducedBy,tries,totalTries, Scores.initFail, Scores.shuffleFail, Scores.failSwap, Scores.failDonate);
 			}
 //			flowCell.printFlowCell();
 //			System.in.read();

@@ -25,25 +25,37 @@ public class FlowCell {
 	}
 
 	public boolean initialAddSamples(ArrayList<Sample> samples) throws IOException {
+		//DEBUG
+		lanes_ = new ArrayList<Lane>();
 		Iterator<Sample> iSample = samples.iterator();
+		int laneNum=0;
 		while (iSample.hasNext()) {
 			Sample sample = iSample.next();
-			int randomLaneNumber = (int) (Math.random() * numLanes_);
-			Lane targetLane = lanes_.get(randomLaneNumber);
-			// check that this lane doesn't already contain a sample with the
-			// same barcode
-			int additionAttempts = 0;
-			while (targetLane.hasBarcode(sample.Barcode())) {
-				if (++additionAttempts > 100) {
-					this.clear();
-					return false;
-				}
-				randomLaneNumber = (int) (Math.random() * numLanes_);
-				targetLane = lanes_.get(randomLaneNumber);
-			}
-
-			targetLane.addSample(sample);
+			lanes_.add(new Lane(laneNum, capacityPerLane_));
+			lanes_.get(laneNum).addSample(sample);
+			++laneNum;
 		}
+		//END DEBUG
+//		Iterator<Sample> iSample = samples.iterator();
+//		while (iSample.hasNext()) {
+//			Sample sample = iSample.next();
+//			int randomLaneNumber = (int) (Math.random() * numLanes_);
+//			Lane targetLane = lanes_.get(randomLaneNumber);
+//			// check that this lane doesn't already contain a sample with the
+//			// same barcode
+//			int additionAttempts = 0;
+//			while (targetLane.hasBarcode(sample.Barcode())) {
+//				if (++additionAttempts > 100) {
+//					this.clear();
+//					Scores.initFail+=1;
+//					return false;
+//				}
+//				randomLaneNumber = (int) (Math.random() * numLanes_);
+//				targetLane = lanes_.get(randomLaneNumber);
+//			}
+//
+//			targetLane.addSample(sample);
+//		}
 		
 		
 		//calculate max score
@@ -68,7 +80,7 @@ public class FlowCell {
 	}
 
 	public double currentFillLevel() {
-		double val = 0.0;
+		double val=0.00000d;
 		Iterator<Lane> iLane = lanes_.iterator();
 		while (iLane.hasNext()) {
 			val += iLane.next().currentFillLevel();
@@ -140,7 +152,7 @@ public class FlowCell {
 			{
 
 
-				System.out.printf("%.2f\t",(currLane.currentFillLevel() / currLane.Capacity()) * 100.0);
+				System.out.printf("%.6f\t",(currLane.currentFillLevel() / currLane.Capacity()) * 100.0);
 				currLane.printLane();
 				System.out.println();
 			}
@@ -151,8 +163,10 @@ public class FlowCell {
 
 		}
 		double score = calculateFlowCellScore();
+//		double score2 = calculateFlowCellScoreBak();
 
 		System.out.printf("\nTotal Score: %.2f of %.2f (%.2f%%)\n", score,this.maxScore_, 100.0 * (score/this.maxScore_));
+//		System.out.printf("\nTotal Score: %.2f of %.2f (%.2f%%)\n", score2,this.calculateMaxPossibleScoreBak(), 100.0 * (score2/this.calculateMaxPossibleScoreBak()));
 	}
 
 	public double calculateFlowCellScore() {
@@ -173,9 +187,42 @@ public class FlowCell {
 
 		return totScore;
 	}
+	
+	public double calculateFlowCellScorePercent() {
+		Iterator<Lane> iLane = lanes_.iterator();
+		double totScore = 0.0;
+		int numLanes = 0;
+		while (iLane.hasNext()) {
+			Lane currLane = iLane.next();
+			if (!currLane.isEmpty()) {
+				totScore+= currLane.currentFillLevel();
+				numLanes++;
+						
+
+//				System.out.printf("%.2f + ", score);
+
+			}
+
+		}
+//		System.out.printf(" TotScore = %.2f\n", totScore);
+
+		return totScore/(double)numLanes;
+	}
 
 	public ArrayList<Lane> getLanes() {
 		return lanes_;
+	}
+	
+	public double calculateMaxPossibleScoreBak(){
+		double totalSampleSize = this.currentFillLevel();
+		int wholeNumber = (int) totalSampleSize;
+//		System.out.println("Calculating max score");
+//		System.out.printf("TotalSize: %.2f  ->  %d\n",totalSampleSize, wholeNumber);
+		double remainder = 100.0 * (1.0 - (totalSampleSize - wholeNumber));
+		double maxScore = Math.pow(remainder, 2);
+//		System.out.printf("MaxScore: %.2f\n", maxScore);
+		
+		return maxScore;
 	}
 	
 	public double calculateMaxPossibleScore(){
@@ -183,8 +230,8 @@ public class FlowCell {
 		int wholeNumber = (int) totalSampleSize;
 //		System.out.println("Calculating max score");
 //		System.out.printf("TotalSize: %.2f  ->  %d\n",totalSampleSize, wholeNumber);
-		double remainder = 100.0 * (1.0 - (totalSampleSize - wholeNumber));
-		double maxScore = Math.pow(remainder, 2);
+		double remainder = totalSampleSize - wholeNumber;
+		double maxScore = (wholeNumber + remainder)/(wholeNumber+1);
 //		System.out.printf("MaxScore: %.2f\n", maxScore);
 		
 		return maxScore;

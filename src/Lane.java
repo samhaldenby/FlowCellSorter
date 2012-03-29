@@ -67,7 +67,7 @@ public class Lane {
 	
 	
 	public double currentFillLevel(){
-		double currTotal=0.0;
+		double currTotal=0.00000d;
 		Iterator<Sample> iSample = samples_.iterator();
 		while(iSample.hasNext()){
 			currTotal+=iSample.next().Reads();
@@ -127,7 +127,7 @@ public class Lane {
 		System.out.printf("%d:", laneNumber_);
 		while(iSample.hasNext()){
 			Sample sample = iSample.next();
-			System.out.printf("[%s,%.2f] ",sample.Barcode(),sample.Reads());
+			System.out.printf("[%s,%.5f] ",sample.Barcode(),sample.Reads());
 		}
 //		System.out.println();
 		
