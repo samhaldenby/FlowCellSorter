@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 
 public class FlowCell {
@@ -21,7 +22,38 @@ public class FlowCell {
 		}
 	}
 	
+	public boolean initialAddSamples(ArrayList<Sample> samples){
+		Iterator<Sample> iSample = samples.iterator();
+		while(iSample.hasNext()){
+			Sample sample = iSample.next();
+			int randomLaneNumber = (int) (Math.random()*numLanes_);
+			Lane targetLane = lanes_.get(randomLaneNumber);
+			//check that this lane doesn't already contain a sample with the same barcode
+			int additionAttempts=0;
+			while(targetLane.hasBarcode(sample.Barcode())){
+				if(++additionAttempts>100){
+					this.clear();
+					return false;
+				}
+				randomLaneNumber = (int) (Math.random()*numLanes_);
+				targetLane = lanes_.get(randomLaneNumber);
+			}
+			
+			targetLane.addSample(sample);
+		}
+		
+		return true;
+	}
 	
+	private void clear() {
+		//clear all lanes
+		Iterator<Lane> iLane= lanes_.iterator();
+		while(iLane.hasNext()){
+			iLane.next().removeAllSamples();
+		}
+		
+	}
+
 	public void addLane(){
 		lanes_.add(new Lane(numLanes_-1, capacityPerLane_));
 		capacity_+=capacityPerLane_;
@@ -91,7 +123,9 @@ public class FlowCell {
 	}
 
 	public void printFlowCell() {
-		Iterator<Lane> iLane = lanes_.iterator();
+		ArrayList<Lane> sortedLanes = lanes_;
+		Collections.sort(sortedLanes, new LaneFullnessComparator());
+		Iterator<Lane> iLane = sortedLanes.iterator();
 		double totScore = 0.0;
 		while (iLane.hasNext()) {
 			Lane currLane = iLane.next();
@@ -127,6 +161,33 @@ public class FlowCell {
 		}
 
 		return totScore;
+	}
+
+	public ArrayList<Lane> getLanes() {
+		return lanes_;
+	}
+
+	public int NumNonEmptyLanes() {
+		int nonEmptyLanes=0;
+		Iterator<Lane> iLane = lanes_.iterator();
+		while(iLane.hasNext()){
+			if(!iLane.next().isEmpty()){
+				nonEmptyLanes++;
+			}
+		}
+		return nonEmptyLanes;
+	}
+
+	public ArrayList<Lane> NonEmptyLanes() {
+		ArrayList<Lane> nonEmptyLanes = new ArrayList<Lane>();
+		Iterator<Lane> iLane = lanes_.iterator();
+		while(iLane.hasNext()){
+			Lane lane = iLane.next();
+			if(!lane.isEmpty()){
+				nonEmptyLanes.add(lane);
+			}
+		}
+		return nonEmptyLanes;
 	}
 
 }

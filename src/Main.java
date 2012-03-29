@@ -8,12 +8,15 @@ public class Main {
 	final static int NUM_OF_FCS=2;
 	final static double LANE_CAPACITY=1;
 	final static int REQUIRED_ITERATIONS=1000;
-	static int TRIES_BEFORE_INCREASING_NUM_LANES = 100000;
+	static int TRIES_BEFORE_INCREASING_NUM_LANES = 30000;
 	/**
 	 * @param args
 	 * @throws IOException 
 	 */
 	public static void main(String[] args) throws IOException {
+		
+		
+		
 		String fileName = args[0];
 		ArrayList<Sample> samples = null;
 		try {
@@ -26,6 +29,8 @@ public class Main {
 		//DEBUG - random samples
 		samples = SampleSheetRandomiser.create();
 		
+	
+		
 		
 		
 		//create flowcell
@@ -36,19 +41,28 @@ public class Main {
 		}
 		
 //		int numLanesRequired = (int) ((totalRequired+LANE_CAPACITY -1.0) / LANE_CAPACITY); //TODO This doesn't calculate correctly
-		int numLanesRequired =  (int) Math.ceil(totalRequired/ LANE_CAPACITY);
+		int minLanesRequired =  (int) Math.ceil(totalRequired/ LANE_CAPACITY);
+		int maxLanesRequired = samples.size();
+		int numLanesRequired = (minLanesRequired + maxLanesRequired) / 2;
+		
+//		numLanesRequired = samples.size(); //DEBUG ONLY
 		System.out.printf("TotalRequired: %.2f\n",totalRequired);
-		System.out.println(numLanesRequired);
+		System.out.printf("Min: %d\tMax: %d\tAve: %d\n",minLanesRequired, maxLanesRequired, numLanesRequired);
 //		System.in.read();
 		
+		
 
+		Display display = new Display();
+		DisplayUpdater du = new DisplayUpdater(display);
+		new Thread(du).start();
+		
 		long iter = REQUIRED_ITERATIONS;
 		int tries = 0;
 		int totalTries = 0;
 		int timesLanesIncreased =0;
 		int iterReducedBy=0;
 		
-		FlowCell best  = null;
+		
 		double bestScore = 0;
 		while(iter - iterReducedBy!=0){
 			++tries;
@@ -57,13 +71,19 @@ public class Main {
 			FlowCell flowCell = new FlowCell(numLanesRequired,LANE_CAPACITY);
 			
 			//add samples
-			iSample = samples.iterator();
-			while(iSample.hasNext()){
-//				Lane lane= flowCell.getEmptiestLane();
-//				lane.addSample(iSample.next());
-				Lane lane= flowCell.Lane((int) (Math.random()*flowCell.NumLanes()));
-				lane.addSample(iSample.next());
+			int initAddAttempts = 0;
+			while(!flowCell.initialAddSamples(samples)){
+				if(initAddAttempts++==1000){
+					System.out.println("Total failure to add samples. What a pain!");
+				}
 			}
+//			iSample = samples.iterator();
+//			while(iSample.hasNext()){
+////				Lane lane= flowCell.getEmptiestLane();
+////				lane.addSample(iSample.next());
+//				Lane lane= flowCell.Lane((int) (Math.random()*flowCell.NumLanes()));
+//				lane.addSample(iSample.next());
+//			}
 			
 			if(tries%10000==0){
 				System.out.printf("ATTEMPT: %d / %d / %d \n",iter-iterReducedBy,tries,totalTries);
@@ -78,14 +98,14 @@ public class Main {
 				//tot scores
 				if(flowCell.calculateFlowCellScore() > bestScore){
 					bestScore = flowCell.calculateFlowCellScore();
-					best = flowCell;
+					Scores.best = flowCell;
 					System.out.printf("New Best: %.5f\n",bestScore);
 				}
 				
 				
 				if(iter%1==0){
-					System.out.printf("Iters left: %d\tBest: %.5f\n",iter-iterReducedBy,bestScore);
-					best.printFlowCell();
+					System.out.printf("Iters left: %d\tAttempts: %d\tBest: %.5f\n",iter-iterReducedBy, totalTries, bestScore);
+					Scores.best.printFlowCell();
 				}
 				iter--;
 				tries=0;
@@ -97,7 +117,7 @@ public class Main {
 			
 		
 			//expand number of lanes if required
-			if(tries==TRIES_BEFORE_INCREASING_NUM_LANES && iter==REQUIRED_ITERATIONS){
+			if(tries==TRIES_BEFORE_INCREASING_NUM_LANES /*&& iter==REQUIRED_ITERATIONS*/){
 				System.out.printf("Increasing lanes from %d to %d\n",numLanesRequired,numLanesRequired+1);
 //				System.in.read();
 				tries = 0;
@@ -116,7 +136,7 @@ public class Main {
 			
 		}
 		
-		best.printFlowCell();
+		Scores.best.printFlowCell();
 		System.out.printf("Num Samples: %d\n", samples.size());
 		
 			
