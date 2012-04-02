@@ -127,7 +127,7 @@ public class Lane {
 		System.out.printf("%d:", laneNumber_);
 		while(iSample.hasNext()){
 			Sample sample = iSample.next();
-			System.out.printf("[%s,%.5f] ",sample.Barcode(),sample.Reads());
+			System.out.printf("[%s,%s,%.5f] ",sample.Name(), sample.Barcode(),sample.Reads());
 		}
 //		System.out.println();
 		
@@ -263,6 +263,12 @@ public class Lane {
 				Sample subjectSample = iSample.next();
 				if(subjectSample.Name().equals(bundle.Samples().get(i).Name())){
 					System.out.printf("Not adding %s to lane %d as it already exists\n",bundle.Samples().get(i).Name(), laneNumber_);
+					try {
+						System.in.read();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					return false;
 				}
 			}

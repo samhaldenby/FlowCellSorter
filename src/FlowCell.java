@@ -165,7 +165,7 @@ public class FlowCell {
 		double score = calculateFlowCellScore();
 //		double score2 = calculateFlowCellScoreBak();
 
-		System.out.printf("\nTotal Score: %.2f of %.2f (%.2f%%)\n", score,this.maxScore_, 100.0 * (score/this.maxScore_));
+		System.out.printf("\nTotal Score: %.2f vs %.2f (of %.2f (%.2f%%)\n", score, (Scores.best==null ? 0.0 : Scores.best.calculateFlowCellScore()), this.maxScore_, 100.0 * (score/this.maxScore_));
 //		System.out.printf("\nTotal Score: %.2f of %.2f (%.2f%%)\n", score2,this.calculateMaxPossibleScoreBak(), 100.0 * (score2/this.calculateMaxPossibleScoreBak()));
 	}
 
@@ -174,18 +174,18 @@ public class FlowCell {
 		double totScore = 0.0;
 		while (iLane.hasNext()) {
 			Lane currLane = iLane.next();
-			if (!currLane.isEmpty()) {
+//			if (!currLane.isEmpty()) {
 				double score = Math.pow(100.0 - ((currLane.currentFillLevel() / currLane.Capacity()) * 100), 2);
 						
 				totScore += score;
 //				System.out.printf("%.2f + ", score);
 
-			}
+//			}
 
 		}
 //		System.out.printf(" TotScore = %.2f\n", totScore);
 
-		return totScore;
+		return totScore/(double)(lanes_.size());///Math.pow(this.NumNonEmptyLanes(),2);
 	}
 	
 	public double calculateFlowCellScorePercent() {

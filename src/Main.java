@@ -27,10 +27,9 @@ public class Main {
 		}
 		
 		//DEBUG - random samples
-//		samples = SampleSheetRandomiser.create();
+		samples = SampleSheetRandomiser.create();
 		
 	
-		
 		
 		
 		//create flowcell
@@ -94,7 +93,7 @@ public class Main {
 //			System.out.printf("Fill level for fc = %.2f of %.2f\n", flowCell.currentFillLevel(), flowCell.Capacity());
 	//		Shuffler.Shuffle(flowCell);
 			
-			if(RandomShuffler2.Shuffle(flowCell)){
+			if(RandomShuffler.Shuffle(flowCell)){
 				//tot scores
 				if(flowCell.calculateFlowCellScore() > bestScore){
 					bestScore = flowCell.calculateFlowCellScore();

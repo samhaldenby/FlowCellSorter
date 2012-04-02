@@ -5,108 +5,920 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.ListIterator;
 
-
 public class RandomShuffler {
-	
-	public static boolean Shuffle(FlowCell fc) throws IOException{
-		//1) Check if flowcell is too full
-		if(fc.currentFillLevel() > fc.Capacity()){
-			System.out.printf("Shuffle failed: Flowcell too full (%.2f/%.2f)\n",fc.currentFillLevel(),fc.Capacity());
+
+	private static double INIT_THRESHOLD = 0.99;
+	private static double FULL_THRESHOLD = INIT_THRESHOLD;
+
+	public static boolean Shuffle(FlowCell fc) throws IOException {
+		// 1) Check if flowcell is too full
+		if (fc.currentFillLevel() > fc.Capacity()) {
+			System.out.printf(
+					"Shuffle failed: Flowcell too full (%.2f/%.2f)\n", fc
+							.currentFillLevel(), fc.Capacity());
 			return false;
 		}
-		
-		//2) Calculate under/over-filled lanes
-		ArrayList<Lane> overFilled = fc.overFilled();
-		ArrayList<Lane> underFilled = fc.underFilled();
-//		for(int u=0; u<underFilled.size(); ++u){
-//			System.out.printf("UnderFilled: %d\t%.2f\t(%.2f)\n",underFilled.get(u).LaneNumber(), underFilled.get(u).remainingCapacity(), underFilled.get(u).currentFillLevel());
-//		}
-//		
-//		for(int o=0; o<overFilled.size(); ++o){
-//			System.out.printf("OverFilled : %d\t%.2f\t(%.2f)\n",overFilled.get(o).LaneNumber(), overFilled.get(o).remainingCapacity(), overFilled.get(o).currentFillLevel());
-//		}
 
-		double INIT_THRESHOLD = 0.99;
-		double FULL_THRESHOLD = INIT_THRESHOLD;
-		
-		int attempts =0;
-		while(overFilled.size()>0){
-			if(attempts++>1000){
-				return false;
-			}
-			
-			//Grab random sample from 2 random lanes and swap
-			Lane lane1 = fc.Lane((int) (Math.random() * fc.NumLanes()));
-//			System.out.printf("Grabbed L1 as lane %d\t currentFill: %.2f\tremaining %.2f \tFull? %s\n",lane1.LaneNumber(), lane1.currentFillLevel(), lane1.remainingCapacity(), lane1.currentFillLevel() / lane1.Capacity()>FULL_THRESHOLD);
-			double l1attempts=0;
-			while((lane1.currentFillLevel() / lane1.Capacity() >= FULL_THRESHOLD && lane1.remainingCapacity() >0 )|| lane1.remainingCapacity() >0){
-				if(++l1attempts==10){
-//					System.out.printf("%.3f\t%d\n",FULL_THRESHOLD,attempts);
-					FULL_THRESHOLD-=0.01;
-					l1attempts=0;
-				}
-				lane1 = fc.Lane((int) (Math.random() * fc.NumLanes()));
-//				System.out.printf("Grabbed L1 as lane %d\t currentFill: %.2f\tremaining %.2f \tFull? %s\n",lane1.LaneNumber(), lane1.currentFillLevel(), lane1.remainingCapacity(), lane1.currentFillLevel() / lane1.Capacity()>FULL_THRESHOLD);
-			}
-			
-			FULL_THRESHOLD=INIT_THRESHOLD;
-			
-			Lane lane2 = fc.Lane((int) (Math.random() * fc.NumLanes()));
-			double l2attempts=0;
-			while(lane2.LaneNumber()==lane1.LaneNumber() || lane2.currentFillLevel() / lane2.Capacity() >= FULL_THRESHOLD){
-				if(++l2attempts==10){
-//					System.out.printf("%.3f\n",FULL_THRESHOLD);
-					FULL_THRESHOLD-=0.01;
-					l2attempts=0;
-				}
-				lane2 = fc.Lane((int) (Math.random() * fc.NumLanes()));
-			}
-			
-			Sample sample1 = lane1.getRandomSample();
-			Sample sample2 = lane2.getRandomSample();
-			
-			//remove
-			lane1.removeSample(sample1);
-			lane2.removeSample(sample2);
-			
-			//add
-			lane1.addSample(sample2);
-			lane2.addSample(sample1);
-			
-			
-			
-			//recalculate
-			overFilled = fc.overFilled();
-			underFilled = fc.underFilled();
-//			for(int u=0; u<underFilled.size(); ++u){
-//				System.out.printf("UnderFilled: %d\t%.2f\t(%.2f)\n",underFilled.get(u).LaneNumber(), underFilled.get(u).remainingCapacity(), underFilled.get(u).currentFillLevel());
-//			}
-//			
-//			for(int o=0; o<overFilled.size(); ++o){
-//				System.out.printf("OverFilled : %d\t%.2f\t(%.2f)\n",overFilled.get(o).LaneNumber(), overFilled.get(o).remainingCapacity(), overFilled.get(o).currentFillLevel());
-//			}
-//			System.out.printf("FC FULLNESS:%.2f\n", fc.currentFillLevel());
-			
-//			System.in.read();
+		// 2) Calculate under/over-filled lanes
+		// ArrayList<Lane> overFilled = fc.overFilled();
+		// ArrayList<Lane> underFilled = fc.underFilled();
+
+		int attempts = 0;
+		while (++attempts < fc.getLanes().size()) {
+			randomSwap(fc);
+
 		}
-		
-		
-		
-//		for(int u=0; u<underFilled.size(); ++u){
-//			System.out.printf("UnderFilled: %d\t%.2f\t(%.2f)\n",underFilled.get(u).LaneNumber(), underFilled.get(u).remainingCapacity(), underFilled.get(u).currentFillLevel());
-//		}
-//		
-//		for(int o=0; o<overFilled.size(); ++o){
-//			System.out.printf("OverFilled : %d\t%.2f\t(%.2f)\n",overFilled.get(o).LaneNumber(), overFilled.get(o).remainingCapacity(), overFilled.get(o).currentFillLevel());
-//		}
-		
-		
-//		fc.printFlowCell();
-//		System.out.println("DONE!");
+
+		// System.out.println("PostShuffling *****");
+		// fc.printFlowCell();
+		// while(overFilled.size()>0){
+		// System.out.printf("Working: Attempt: %d\n",attempts);
+		// if(attempts++>100){
+		// Scores.shuffleFail+=1;
+		// return false;
+		// }
+		//			
+		// if(Math.random() < 0.5){
+		// if(!randomSwap(fc)){
+		// randomDonate(fc);
+		// }
+		// }
+		// else{
+		// randomDonate(fc);
+		// }
+		//			
+		// overFilled = fc.overFilled();
+		// underFilled = fc.underFilled();
+
+		// }
+
+		// System.out.println("**** Before Polish ");
+		// fc.printFlowCell();
+
+		double rawScore, p1Score, p2Score, s1Score, s2Score, s3Score;
+
+		rawScore = fc.calculateFlowCellScore();
+		// System.out.printf("Raw       : %.2f\n", rawScore);
+		// fc.printFlowCell();
+
+		double prevScore = rawScore;
+		Polish2(fc);
+		// fc.printFlowCell();
+		// Polish2(fc);
+		// Polish2(fc);
+		// Polish2(fc);
+		// Polish2(fc);
+		// Polish2(fc);
+
+		int polishIter = 0;
+		double currScore = fc.calculateFlowCellScore();
+		while (currScore > prevScore) {
+			System.out.printf("P1: Going again as prevScore: %.2f > %.2f\n",
+					currScore, prevScore);
+			// add to score
+			while (polishIter >= Scores.p.size()) {
+				Scores.p.add(new Double(0.0f));
+			}
+
+			Scores.p.set(polishIter, Scores.p.get(polishIter)
+					+ (currScore - prevScore));
+
+			prevScore = currScore;
+			Polish2(fc);
+			// if best, set it
+			if (Scores.best == null
+					|| (fc.calculateFlowCellScore() > Scores.best
+							.calculateFlowCellScore() && fc.NumNonEmptyLanes() <= Scores.best
+							.NumNonEmptyLanes())) {
+				Scores.best = fc;
+				Scores.best.printFlowCell();
+			}
+			currScore = fc.calculateFlowCellScore();
+			// fc.printFlowCell();
+			++polishIter;
+		}
+
+		prevScore = currScore;
+		PolishSwap(fc);
+		// fc.printFlowCell();
+		// PolishSwap(fc);
+		// PolishSwap(fc);
+		// PolishSwap(fc);
+		// PolishSwap(fc);
+
+		int swapIter = 0;
+		currScore = fc.calculateFlowCellScore();
+		while (currScore > prevScore) {
+			// add to score
+			// System.out.printf("S1: Going again as prevScore: %.2f > %.2f\n",currScore,prevScore);
+			while (swapIter >= Scores.s.size()) {
+				Scores.s.add(new Double(0.0f));
+			}
+
+			Scores.s.set(swapIter, Scores.s.get(swapIter)
+					+ (currScore - prevScore));
+
+			prevScore = currScore;
+			PolishSwap(fc);
+			// if best, set it
+			if (Scores.best == null
+					|| (fc.calculateFlowCellScore() > Scores.best
+							.calculateFlowCellScore() && fc.NumNonEmptyLanes() <= Scores.best
+							.NumNonEmptyLanes())) {
+				Scores.best = fc;
+				Scores.best.printFlowCell();
+			}
+			currScore = fc.calculateFlowCellScore();
+//			fc.printFlowCell();
+			++swapIter;
+		}
+
+		prevScore = currScore;
+		Polish2(fc);
+		// fc.printFlowCell();
+		polishIter = 0;
+		currScore = fc.calculateFlowCellScore();
+		while (currScore > prevScore) {
+			// System.out.printf("P1: Going again as prevScore: %.2f > %.2f\n",currScore,prevScore);
+			// add to score
+			while (polishIter >= Scores.p2.size()) {
+				Scores.p2.add(new Double(0.0f));
+			}
+
+			Scores.p2.set(polishIter, Scores.p2.get(polishIter)
+					+ (currScore - prevScore));
+
+			prevScore = currScore;
+			Polish2(fc);
+			// if best, set it
+			if (Scores.best == null
+					|| (fc.calculateFlowCellScore() > Scores.best
+							.calculateFlowCellScore() && fc.NumNonEmptyLanes() <= Scores.best
+							.NumNonEmptyLanes())) {
+				Scores.best = fc;
+				Scores.best.printFlowCell();
+			}
+			currScore = fc.calculateFlowCellScore();
+			// fc.printFlowCell();
+			++polishIter;
+		}
+
+		prevScore = currScore;
+		PolishSwap(fc);
+		// fc.printFlowCell();
+		swapIter = 0;
+		currScore = fc.calculateFlowCellScore();
+		while (currScore > prevScore) {
+			// System.out.printf("S2: Going again as prevScore: %.2f > %.2f (normalised:\t%.2f)\n",currScore,prevScore,
+			// currScore/(double)(fc.NumLanes()));;
+			// add to score
+			while (swapIter >= Scores.s2.size()) {
+				Scores.s2.add(new Double(0.0f));
+			}
+
+			Scores.s2.set(swapIter, Scores.s2.get(swapIter)
+					+ (currScore - prevScore));
+
+			prevScore = currScore;
+			PolishSwap(fc);
+			// if best, set it
+			if (Scores.best == null
+					|| (fc.calculateFlowCellScore() > Scores.best
+							.calculateFlowCellScore() && fc.NumNonEmptyLanes() <= Scores.best
+							.NumNonEmptyLanes())) {
+				Scores.best = fc;
+				Scores.best.printFlowCell();
+			}
+
+			// fc.printFlowCell();
+			currScore = fc.calculateFlowCellScore();
+			++swapIter;
+		}
+
+		Scores.counts++;
+		Scores.report();
+
+		System.out.println("SUCCESS!");
 		return true;
 	}
-	
 
-	
+	private static void Polish(FlowCell fc) {
+		// check if any low content lanes can be jiggled into another lane
+
+		ArrayList<Lane> leastFilledLanes = fc.underFilled();
+
+		Collections.sort(leastFilledLanes, new LaneFullnessComparator());
+
+		// grab least filled NON-EMPTY lane
+		Lane lowest = null;
+		Iterator<Lane> iLow = leastFilledLanes.iterator();
+		while (iLow.hasNext()) {
+			Lane next = iLow.next();
+			if (next.isEmpty()) {
+				continue;
+			} else if (lowest == null
+					|| next.remainingCapacity() > lowest.remainingCapacity()) {
+				System.out.printf("Setting lane %d as lowest (%.2f)\n", next
+						.LaneNumber(), next.remainingCapacity());
+				lowest = next;
+			}
+		}
+
+		for (int u = 0; u < leastFilledLanes.size(); ++u) {
+			System.out.printf("UnderFilled: %d\t%.2f\n", leastFilledLanes
+					.get(u).LaneNumber(), leastFilledLanes.get(u)
+					.remainingCapacity());
+		}
+
+		// check each sample in lowest
+
+		boolean done = false;
+		int attempts = 0;
+		System.out.printf("Lowest lane = %d (%.2f)\n", lowest.LaneNumber(),
+				(lowest.currentFillLevel() / lowest.Capacity()) * 100.0);
+		while (!done) {
+			Iterator<Sample> iSample = lowest.getSamples().iterator();
+			Sample s = iSample.next();
+			System.out.printf("Attempting to move sample of %.2f\n", s.Reads());
+			// take largest from least filled lane (moving towards smallest if
+			// no success)
+			ListIterator<Lane> iLane = leastFilledLanes
+					.listIterator(leastFilledLanes.size());
+			boolean foundTargetLane = false;
+
+			while (iLane.hasPrevious() && !foundTargetLane) {
+
+				// check that lane has the most appropriate underfill that will
+				// accomodate sample
+				Lane lane = iLane.previous();
+				System.out.printf("Lane %d : Remaining capacity: %.2f\n", lane
+						.LaneNumber(), lane.remainingCapacity());
+
+				// don't compare to self!
+				if (lane.LaneNumber() == lowest.LaneNumber()) {
+					continue;
+				}
+				if (s.Reads() <= lane.remainingCapacity()) {
+					System.out
+							.printf(
+									"Sticking %s(%.2f) in laneLane %d : Remaining capacity: %.2f\n",
+									s.Name(), s.Reads(), lane.LaneNumber(),
+									lane.remainingCapacity());
+					foundTargetLane = true;
+
+					// move around!
+					lane.addSample(s);
+					lowest.removeSample(s);
+					continue;
+				}
+
+			}
+
+			if (++attempts == 10) {
+				done = true;
+			}
+
+		}
+
+	}
+
+	public static boolean Polish2(FlowCell fc) {
+		// System.out.println("Polish2");
+		// sort lanes from most full to least full
+		ArrayList<Lane> sortedLanes = fc.underFilled();
+		Collections.sort(sortedLanes, new LaneFullnessComparator());
+		// System.out.printf("* Sorted lanes by fullness\n");
+
+		// starting from full to least full, try and squeeze samples into gap on
+		// lane
+		boolean donePolishing = false;
+
+		ListIterator<Lane> iLaneR = sortedLanes
+				.listIterator(sortedLanes.size());
+		while (!donePolishing && iLaneR.hasPrevious()) {
+			if (Scores.best == null
+					|| (fc.calculateFlowCellScore() > Scores.best.calculateFlowCellScore())) {
+				Scores.best = fc;
+				Scores.best.printFlowCell();
+			}
+			Lane fullest = iLaneR.previous();
+			// System.out.printf("Attempting to move stuff to lane %d (%.2f)\n",
+			// fullest.LaneNumber(),fullest.remainingCapacity());
+			ListIterator<Lane> iLaneF = sortedLanes.listIterator();
+			boolean searchForGapComplete = false;
+			while (iLaneF.hasNext()/* && !searchForGapComplete */) {
+				Lane emptiest = iLaneF.next();
+				// check each sample in lane to see if any will fit in gap in
+				// fullest lane
+
+				Iterator<Sample> iSample = emptiest.getSamples().iterator();
+				// ArrayList<Sample> samplesToRemove = new ArrayList<Sample>();
+				// //store samples for erasing
+				while (iSample.hasNext()) {
+					Sample sample = iSample.next();
+					if (sample.Reads() <= fullest.remainingCapacity()
+							&& !fullest.hasBarcode(sample.Barcode())
+							&& fullest.currentFillLevel() + sample.Reads() > emptiest
+									.currentFillLevel()) {
+
+						// donePolishing=true; //just one iteration for
+						// debugging purposes
+
+						// final check that we're not comparing lane with itself
+						if (fullest.LaneNumber() != emptiest.LaneNumber()) {
+							// System.out.printf("Found slot [%d : %.2f]-> [%d : %.2f]\n",emptiest.LaneNumber(),
+							// sample.Reads(), fullest.LaneNumber(),
+							// fullest.remainingCapacity());
+							searchForGapComplete = true;
+							fullest.addSample(sample);
+							iSample.remove();
+							
+							if (Scores.best == null
+									|| (fc.calculateFlowCellScore() > Scores.best.calculateFlowCellScore())) {
+								Scores.best = fc;
+								Scores.best.printFlowCell();
+							}
+							// fc.printFlowCell();
+							// samplesToRemove.add(sample);
+						} else {
+							// System.out.printf("SAME  slot [%d : %.2f]-> [%d : %.2f]\n",emptiest.LaneNumber(),
+							// sample.Reads(), fullest.LaneNumber(),
+							// fullest.remainingCapacity());
+						}
+
+					}
+
+					// Iterator<Sample> remSam = samplesToRemove.iterator();
+					// while(remSam.hasNext()){
+					// emptiest.removeSample(remSam.next());
+					// }
+
+				}
+
+			}
+
+		}
+		// attempt to find something from other lanes that will fill this gap
+
+		// if(Scores.best == null || fc.calculateFlowCellScore() >
+		// Scores.best.calculateFlowCellScore()){
+		// Scores.best = fc;
+		// }
+		return true;
+	}
+
+	public static boolean PolishSwap(FlowCell fc) throws IOException {
+		// System.out.println(" *** POLISH SWAP *** ");
+		// fc.printFlowCell();
+		// sort lanes from full->empty
+		ArrayList<Lane> sortedLanes = fc.getLanes();
+		Collections.sort(sortedLanes, new LaneFullnessComparator());
+
+		// System.out.printf("Test: Fullest lane is: %.2f\n",sortedLanes.get(sortedLanes.size()-1).currentFillLevel());
+
+		// starting with fullest lane and working towards least full, see if any
+		// other lane has anything it can take
+		ListIterator<Lane> iFuller = sortedLanes.listIterator(sortedLanes
+				.size());
+		while (iFuller.hasPrevious()) {
+			boolean doneForThisSample = false;
+			Lane fuller = iFuller.previous();
+
+			// System.out.printf("Attempting to gap fill on lane %d (%.2f)",fuller.LaneNumber(),
+			// fuller.currentFillLevel());
+			// fuller.printLane();
+			// System.out.println();
+
+			// Calculate bundles from fuller
+			ArrayList<SampleBundle> fullerBundles = fuller
+					.calculateSampleBundlePermutations();
+			// Consider swapping out each sample in turn from fullest and see if
+			// a better one can be found
+
+			// starting with the emptiest lane and working towards the fullest,
+			// check for bundles to grab
+			Iterator<Lane> iEmptier = sortedLanes.iterator();
+			while (iEmptier.hasNext()) {
+
+				Lane emptier = iEmptier.next();
+
+				// don't proceed if emptier == fuller!
+				if (emptier.LaneNumber() == fuller.LaneNumber()) {
+					continue;
+				}
+
+				// check emptier isn't empty!
+				if (emptier.isEmpty()) {
+					continue;
+				}
+				// don't proceed if emptier is fuller than fuller!
+				if (emptier.currentFillLevel() > fuller.currentFillLevel()) {
+					continue;
+				}
+
+				// System.out.printf("\tGrabbing from lane %d (%.2f)",emptier.LaneNumber(),
+				// emptier.currentFillLevel());
+				// emptier.printLane();
+				// System.out.println();
+
+				// if all is fine, calculate emptier bundles
+				ArrayList<SampleBundle> emptierBundles = emptier
+						.calculateSampleBundlePermutations();
+
+				Iterator<SampleBundle> iFullerBundles = fullerBundles
+						.iterator();
+
+				// compare
+				while (iFullerBundles.hasNext()) {
+
+					SampleBundle fullerBundle = iFullerBundles.next();
+					// System.out.printf("\t\tComparing bundle from fuller %.2f\n",fullerBundle.Size());
+					Iterator<SampleBundle> iEmptierBundles = emptierBundles
+							.iterator();
+
+					while (iEmptierBundles.hasNext()) {
+						SampleBundle emptierBundle = iEmptierBundles.next();
+						// System.out.printf("\t\t\tTo emptier %.2f\n",emptierBundle.Size());
+						// check (1) that replacing the sample with the bundle
+						// would be better and (b) that it won't exceed
+						// capacity)
+						double fullerSizeAfterSwap = fuller.currentFillLevel()
+								- fullerBundle.Size() + emptierBundle.Size();
+						double emptierSizeAfterSwap = emptier
+								.currentFillLevel()
+								- emptierBundle.Size() + fullerBundle.Size();
+
+						// System.out.println("______________________");
+						// System.out.printf("Checking barcode swap\n");
+						// fc.printFlowCell();
+						// System.out.printf("Fuller: "); fuller.printLane();
+						// System.out.printf("Single: %s\n",
+						// fromFuller.Barcode());
+						// System.out.printf("Emptier: "); emptier.printLane();
+						// System.out.printf("bundle: "); bundle.printBundle();
+						// System.out.printf("FullerSizeAfterSwap: %.2f\n",
+						// fullerSizeAfterSwap);
+						// System.out.printf("EmptierSizeAfterSwap: %.2f\n",
+						// emptierSizeAfterSwap);
+						if (fullerSizeAfterSwap < fuller.Capacity()
+								&& fullerSizeAfterSwap > emptierSizeAfterSwap
+								&& fullerSizeAfterSwap > fuller
+										.currentFillLevel())
+						// if(bundle.Size() - fromFuller.Reads() > 0 &&
+						// bundle.Size() + fuller.currentFillLevel() -
+						// fromFuller.Reads() <= fuller.Capacity())
+						{
+							// TODO: Check barcodes!!!
+							// check barcode situation
+							// 1) if bundle has same barcode as single, that's
+							// fine for the receiver of the single
+							// OR if emptier doesn't contain that barcode at all
+							ArrayList<Sample> s2eSharedSamples = emptier
+									.getSharedBarcodes(fullerBundle.Samples());
+							boolean singleToEmptyOk = s2eSharedSamples.size() == (fullerBundle
+									.getSharedBarcodes(emptierBundle.Samples())
+									.size()); // i.e. if number of barcodes
+												// shared between fBundle and
+												// empty is the same as number
+												// of barcodes shared between
+												// fBundle and eBundle
+							// boolean singleToEmptyOk =
+							// (bundle.containsBarcode(fromFuller.Barcode()) ||
+							// !emptier.hasBarcode(fromFuller.Barcode()));
+							// 2) if fuller has none of the barcodes contained
+							// in bundle, that's ok to receive
+							// OR if there is ONE shared barcode, but that
+							// barcode in fuller is migrating out to emptier
+							// (kind of a swap).
+							ArrayList<Sample> sharedSamples = fuller
+									.getSharedBarcodes(emptierBundle.Samples());
+							boolean bundleToFullOk = (sharedSamples.size() == emptierBundle
+									.getSharedBarcodes(fullerBundle.Samples())
+									.size());
+
+							// System.out.println("______________________");
+							// System.out.printf("Checking barcode swap\n");
+							// fc.printFlowCell();
+							// System.out.printf("Fuller: ");
+							// fuller.printLane();
+							// System.out.printf("Single: %s\n",
+							// fromFuller.Barcode());
+							// System.out.printf("Emptier: ");
+							// emptier.printLane();
+							// System.out.printf("bundle: ");
+							// bundle.printBundle();
+							//							
+							// System.out.printf("SingleToEmptyOk? %s\n",
+							// singleToEmptyOk);
+							// System.out.printf("BundleToFullOk?  %s\n",
+							// bundleToFullOk);
+
+							if (singleToEmptyOk && bundleToFullOk) {
+								// addBundle
+								if (!fuller.addBundle(emptierBundle)) {
+									System.out
+											.printf("ERROR: duplicate sample while adding emptier bundle to fuller\n");
+									System.in.read();
+								}
+								for (int i = 0; i < emptierBundle.Samples()
+										.size(); ++i) {
+									emptier.removeSample(emptierBundle
+											.Samples().get(i));
+								}
+								if (emptierBundle.Size() == 0) {
+									System.out
+											.println("Empty bundle from emptier!");
+								}
+								iEmptierBundles.remove();
+
+								if (!emptier.addBundle(fullerBundle)) {
+									System.out
+											.printf("ERROR: duplicate sample while adding fuller bundle to empty\n");
+									System.in.read();
+								}
+								for (int i = 0; i < fullerBundle.Samples()
+										.size(); ++i) {
+									fuller.removeSample(fullerBundle.Samples()
+											.get(i));
+								}
+
+								// System.out.println("Successful swap!");
+								// fc.printFlowCell();
+
+								doneForThisSample = true;
+							}
+							// System.out.println("______________________");
+							// System.in.read();
+							// System.out.printf("Found match: Bundle ");
+							// bundle.printBundle();
+							// System.out.printf(" from lane %d (%.2f)",emptier.LaneNumber(),
+							// emptier.currentFillLevel());
+							// System.out.printf(" in exchange for %.2f from lane %d\n",fromFuller.Reads(),
+							// fuller.LaneNumber());
+
+							// System.in.read();
+
+						}
+
+						if (doneForThisSample)
+							break;
+					}
+					if (doneForThisSample) {
+						// // iFromFuller.remove();
+						break;
+					}
+
+				}
+				if (doneForThisSample) {
+					// // iFromFuller.remove();
+					break;
+				}
+			}
+			if (doneForThisSample) {
+				// // iFromFuller.remove();
+				break;
+			}
+
+		}
+
+		if (Scores.best == null
+				|| (fc.calculateFlowCellScore() > Scores.best.calculateFlowCellScore())) {
+			Scores.best = fc;
+			Scores.best.printFlowCell();
+		}
+		return true;
+	}
+
+	public static boolean PolishSwapBak(FlowCell fc) throws IOException {
+		System.out.println(" *** POLISH SWAP *** ");
+//		fc.printFlowCell();
+		// sort lanes from full->empty
+		ArrayList<Lane> sortedLanes = fc.getLanes();
+		Collections.sort(sortedLanes, new LaneFullnessComparator());
+
+		// System.out.printf("Test: Fullest lane is: %.2f\n",sortedLanes.get(sortedLanes.size()-1).currentFillLevel());
+
+		// starting with fullest lane and working towards least full, see if any
+		// other lane has anything it can take
+		ListIterator<Lane> iFuller = sortedLanes.listIterator(sortedLanes
+				.size());
+		while (iFuller.hasPrevious()) {
+			boolean doneForThisSample = false;
+			Lane fuller = iFuller.previous();
+
+			// System.out.printf("Attempting to gap fill on lane %d (%.2f)",fuller.LaneNumber(),
+			// fuller.currentFillLevel());
+			// fuller.printLane();
+			// System.out.println();
+
+			// Calculate bundles from fuller
+			ArrayList<SampleBundle> fullerBundles = fuller
+					.calculateSampleBundlePermutations();
+			// Consider swapping out each sample in turn from fullest and see if
+			// a better one can be found
+			Iterator<SampleBundle> iFullerBundles = fullerBundles.iterator();
+			while (iFullerBundles.hasNext()) {
+				// DEBUG AND CHECK THIS!
+
+				SampleBundle fromFuller = iFullerBundles.next();
+
+				// starting with the emptiest lane and working towards the
+				// fullest, check for bundles to grab
+				Iterator<Lane> iEmptier = sortedLanes.iterator();
+				while (iEmptier.hasNext()) {
+					Lane emptier = iEmptier.next();
+
+					// don't proceed if emptier == fuller!
+					if (emptier.LaneNumber() == fuller.LaneNumber()) {
+						continue;
+					}
+
+					// don't proceed if emptier is fuller than fuller!
+					if (emptier.currentFillLevel() > fuller.currentFillLevel()) {
+						continue;
+					}
+
+					// check emptier isn't empty
+					if (emptier.isEmpty()) {
+						continue;
+					}
+
+					// get bundles!
+					ArrayList<SampleBundle> emptierBundles = emptier
+							.calculateSampleBundlePermutations();
+					// check each bundle from large to small to see which will
+					// fit
+					Iterator<SampleBundle> iEmptierBundles = emptierBundles
+							.iterator();
+					while (iEmptierBundles.hasNext()) {
+						SampleBundle bundle = iEmptierBundles.next();
+						// check (1) that replacing the sample with the bundle
+						// would be better and (b) that it won't exceed
+						// capacity)
+						double fullerSizeAfterSwap = fuller.currentFillLevel()
+								- fromFuller.Size() + bundle.Size();
+						double emptierSizeAfterSwap = emptier
+								.currentFillLevel()
+								- bundle.Size() + fromFuller.Size();
+
+						// System.out.println("______________________");
+						// System.out.printf("Checking barcode swap\n");
+						// fc.printFlowCell();
+						// System.out.printf("Fuller: "); fuller.printLane();
+						// System.out.printf("Single: %s\n",
+						// fromFuller.Barcode());
+						// System.out.printf("Emptier: "); emptier.printLane();
+						// System.out.printf("bundle: "); bundle.printBundle();
+						// System.out.printf("FullerSizeAfterSwap: %.2f\n",
+						// fullerSizeAfterSwap);
+						// System.out.printf("EmptierSizeAfterSwap: %.2f\n",
+						// emptierSizeAfterSwap);
+						if (fullerSizeAfterSwap < fuller.Capacity()
+								&& fullerSizeAfterSwap > emptierSizeAfterSwap
+								&& fullerSizeAfterSwap > fuller
+										.currentFillLevel())
+						// if(bundle.Size() - fromFuller.Reads() > 0 &&
+						// bundle.Size() + fuller.currentFillLevel() -
+						// fromFuller.Reads() <= fuller.Capacity())
+						{
+							// TODO: Check barcodes!!!
+							// check barcode situation
+							// 1) if bundle has same barcode as single, that's
+							// fine for the receiver of the single
+							// OR if emptier doesn't contain that barcode at all
+							ArrayList<Sample> s2eSharedSamples = emptier
+									.getSharedBarcodes(fromFuller.Samples());
+							boolean singleToEmptyOk = s2eSharedSamples.size() == (fromFuller
+									.getSharedBarcodes(bundle.Samples()).size()); // i.e.
+																					// if
+																					// number
+																					// of
+																					// barcodes
+																					// shared
+																					// between
+																					// fBundle
+																					// and
+																					// empty
+																					// is
+																					// the
+																					// same
+																					// as
+																					// number
+																					// of
+																					// barcodes
+																					// shared
+																					// between
+																					// fBundle
+																					// and
+																					// eBundle
+							// boolean singleToEmptyOk =
+							// (bundle.containsBarcode(fromFuller.Barcode()) ||
+							// !emptier.hasBarcode(fromFuller.Barcode()));
+							// 2) if fuller has none of the barcodes contained
+							// in bundle, that's ok to receive
+							// OR if there is ONE shared barcode, but that
+							// barcode in fuller is migrating out to emptier
+							// (kind of a swap).
+							ArrayList<Sample> sharedSamples = fuller
+									.getSharedBarcodes(bundle.Samples());
+							boolean bundleToFullOk = (sharedSamples.size() == bundle
+									.getSharedBarcodes(fromFuller.Samples())
+									.size());
+
+							// System.out.println("______________________");
+							// System.out.printf("Checking barcode swap\n");
+							// fc.printFlowCell();
+							// System.out.printf("Fuller: ");
+							// fuller.printLane();
+							// System.out.printf("Single: %s\n",
+							// fromFuller.Barcode());
+							// System.out.printf("Emptier: ");
+							// emptier.printLane();
+							// System.out.printf("bundle: ");
+							// bundle.printBundle();
+							//							
+							// System.out.printf("SingleToEmptyOk? %s\n",
+							// singleToEmptyOk);
+							// System.out.printf("BundleToFullOk?  %s\n",
+							// bundleToFullOk);
+
+							if (singleToEmptyOk && bundleToFullOk) {
+								// addBundle
+								fuller.addBundle(bundle);
+								for (int i = 0; i < bundle.Samples().size(); ++i) {
+									emptier.removeSample(bundle.Samples()
+											.get(i));
+								}
+								iEmptierBundles.remove();
+
+								emptier.addBundle(fromFuller);
+								for (int i = 0; i < fromFuller.Samples().size(); ++i) {
+									fuller.removeSample(fromFuller.Samples()
+											.get(i));
+								}
+
+								// System.out.println("Successful swap!");
+								// fc.printFlowCell();
+
+								doneForThisSample = true;
+							}
+							// System.out.println("______________________");
+							// System.in.read();
+							// System.out.printf("Found match: Bundle ");
+							// bundle.printBundle();
+							// System.out.printf(" from lane %d (%.2f)",emptier.LaneNumber(),
+							// emptier.currentFillLevel());
+							// System.out.printf(" in exchange for %.2f from lane %d\n",fromFuller.Reads(),
+							// fuller.LaneNumber());
+
+							// System.in.read();
+
+						}
+
+						if (doneForThisSample)
+							break;
+					}
+					if (doneForThisSample)
+						break;
+				}
+				if (doneForThisSample) {
+					// iFromFuller.remove();
+					break;
+				}
+			}
+
+		}
+
+		if (Scores.best == null
+				|| (fc.calculateFlowCellScore() > Scores.best
+						.calculateFlowCellScore() && fc.NumNonEmptyLanes() <= Scores.best
+						.NumNonEmptyLanes())) {
+			Scores.best = fc;
+		}
+		return true;
+	}
+
+	public static boolean randomSwap(FlowCell fc) throws IOException {
+
+		// Grab random sample from 2 random lanes and swap
+		Lane lane1 = fc.Lane((int) (Math.random() * fc.NumLanes()));
+		// System.out.printf("Grabbed L1 as lane %d\t currentFill: %.2f\tremaining %.2f \tFull? %s\n",lane1.LaneNumber(),
+		// lane1.currentFillLevel(), lane1.remainingCapacity(),
+		// lane1.currentFillLevel() / lane1.Capacity()>FULL_THRESHOLD);
+		double l1attempts = 0;
+		boolean l1IsFull = lane1.currentFillLevel() / lane1.Capacity() >= FULL_THRESHOLD;
+		boolean l1Overflowing = lane1.remainingCapacity() < 0;
+		boolean l1Good = l1IsFull && !l1Overflowing;
+		while (l1Good || lane1.isEmpty()) {
+			if (++l1attempts == 10) {
+				// System.out.printf("%.3f\t%d\n",FULL_THRESHOLD,attempts);
+				FULL_THRESHOLD -= 0.01;
+				if (FULL_THRESHOLD < 0.9) {
+					// System.out.printf("Failed\n");
+					Scores.failSwap += 1;
+					return false;
+				}
+				l1attempts = 0;
+			}
+			lane1 = fc.Lane((int) (Math.random() * fc.NumLanes()));
+
+			l1IsFull = lane1.currentFillLevel() / lane1.Capacity() >= FULL_THRESHOLD;
+			l1Overflowing = lane1.remainingCapacity() < 0;
+			l1Good = l1IsFull && !l1Overflowing;
+			// System.out.printf("Grabbed L1 as lane %d\t currentFill: %.2f\tremaining %.2f \tFull? %s\n",lane1.LaneNumber(),
+			// lane1.currentFillLevel(), lane1.remainingCapacity(),
+			// lane1.currentFillLevel() / lane1.Capacity()>FULL_THRESHOLD);
+		}
+
+		FULL_THRESHOLD = INIT_THRESHOLD;
+
+		Lane lane2 = fc.Lane((int) (Math.random() * fc.NumLanes()));
+		double l2attempts = 0;
+		boolean l2IsFull = lane2.currentFillLevel() / lane2.Capacity() >= FULL_THRESHOLD;
+		boolean l2Overflowing = lane2.remainingCapacity() < 0;
+		boolean l2Good = l2IsFull && !l2Overflowing;
+		while (l2Good || lane2.LaneNumber() == lane1.LaneNumber()
+				|| lane2.isEmpty()) {
+			if (++l2attempts == 10) {
+				// System.out.printf("%.3f\n",FULL_THRESHOLD);
+				FULL_THRESHOLD -= 0.01;
+				if (FULL_THRESHOLD < 0.9) {
+					Scores.failSwap += 1;
+					return false;
+				}
+				l2attempts = 0;
+			}
+			lane2 = fc.Lane((int) (Math.random() * fc.NumLanes()));
+			l2IsFull = lane2.currentFillLevel() / lane2.Capacity() >= FULL_THRESHOLD;
+			l2Overflowing = lane2.remainingCapacity() < 0;
+			l2Good = l2IsFull && !l2Overflowing;
+
+		}
+
+		Sample sample1 = lane1.getRandomSample();
+		Sample sample2 = null;
+		if (lane2.hasBarcode(sample1.Barcode())) {
+			sample2 = lane2.getSampleByBarcode(sample1.Barcode());
+		} else {
+			sample2 = lane2.getRandomSample();
+			int changeSample2Attempt = 0;
+			while (lane1.hasBarcode(sample2.Barcode())) {
+				sample2 = lane2.getRandomSample();
+				if (++changeSample2Attempt == 100) {
+					Scores.failSwap += 1;
+					return false;
+				}
+			}
+		}
+
+		// System.out.printf("Swapping [%d-%s] <> [%d-%s]\n",lane1.LaneNumber(),sample1.Barcode(),
+		// lane2.LaneNumber(),sample2.Barcode());
+		// remove
+		lane1.removeSample(sample1);
+		lane2.removeSample(sample2);
+
+		// add
+		lane1.addSample(sample2);
+		lane2.addSample(sample1);
+
+		// System.out.printf("Success\n");
+		return true;
+	}
+
+	public static boolean randomDonate(FlowCell fc) {
+		// System.out.printf("randomDonate: ");
+		int attempts = 0;
+		Lane donor = fc.Lane((int) (Math.random() * fc.NumLanes()));
+		while (donor.isEmpty()) {
+			if (attempts++ > 10) {
+				// System.out.printf("Failed\n");
+				Scores.failDonate += 1;
+				return false;
+			}
+			donor = fc.Lane((int) (Math.random() * fc.NumLanes()));
+		}
+
+		Sample donation = donor.getRandomSample();
+
+		attempts = 0;
+		Lane receiver = fc.Lane((int) (Math.random() * fc.NumLanes()));
+		while (receiver.LaneNumber() == donor.LaneNumber()
+				|| receiver.hasBarcode(donation.Barcode())) {
+			if (attempts++ > 10) {
+				Scores.failDonate += 1;
+				return false;
+			}
+
+			receiver = fc.Lane((int) (Math.random() * fc.NumLanes()));
+
+		}
+
+		// finally, do swap
+		receiver.addSample(donation);
+		donor.removeSample(donation);
+
+		// System.out.printf("Success\n");
+		return true;
+	}
 
 }
