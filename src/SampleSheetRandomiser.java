@@ -8,11 +8,12 @@ import java.util.Set;
 
 public class SampleSheetRandomiser {
 	
-	private static int NUM_POOLS = 20;
+	private static int NUM_POOLS = 10;
+	private static float CHANCE_OF_POOLING=0.75f;
 	
 	public static ArrayList<Sample> create() throws IOException{
 		ArrayList<Sample> samples = new ArrayList<Sample>();
-		int numOfSamples = (int)(Math.random()*1+20);
+		int numOfSamples = (int)(Math.random()*1+30);
 		
 		float num = 0.66f;
 		HashMap<Integer,HashSet<String>> poolHash = new HashMap<Integer,HashSet<String>>();
@@ -102,23 +103,29 @@ public class SampleSheetRandomiser {
 			
 			String barcode = barcodes.get((int)(Math.random()*24));
 			
-			//Pooling info
-			//only add to a pool if a sample of that barcode does not already exist
-			int randPoolNum = r.nextInt(NUM_POOLS);
-			int poolingAttempt=0;
-			while(poolHash.get(randPoolNum).contains(barcode)){
-				if(++poolingAttempt==100){
-					System.out.println("SampleSheetRandomiser failed to add all samples to pools. Please restart");
-					System.in.read();
+			//should this be pooled?
+			int pool = Consts.NO_POOL;
+			if(r.nextFloat()<CHANCE_OF_POOLING){
+				//Pooling info
+				//only add to a pool if a sample of that barcode does not already exist
+				
+				int randPoolNum = r.nextInt(NUM_POOLS);
+				int poolingAttempt=0;
+				while(poolHash.get(randPoolNum).contains(barcode)){
+					if(++poolingAttempt==100){
+						System.out.println("SampleSheetRandomiser failed to add all samples to pools. Please restart");
+						System.in.read();
+					}
+					randPoolNum = r.nextInt(NUM_POOLS);
 				}
-				randPoolNum = r.nextInt(NUM_POOLS);
+				
+				//add to pool
+				HashSet<String> tempBarcodeSet = poolHash.get(randPoolNum);
+				tempBarcodeSet.add(barcode);
+				poolHash.put(randPoolNum, tempBarcodeSet);
+				pool = randPoolNum;
 			}
 			
-			//add to pool
-			HashSet<String> tempBarcodeSet = poolHash.get(randPoolNum);
-			tempBarcodeSet.add(barcode);
-			poolHash.put(randPoolNum, tempBarcodeSet);
-			int pool = randPoolNum;
 			
 
 

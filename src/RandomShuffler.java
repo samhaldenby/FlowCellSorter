@@ -101,7 +101,7 @@ public class RandomShuffler {
 		}
 
 		prevScore = currScore;
-//		PolishSwap(fc);
+		PolishSwap(fc);
 		// fc.printFlowCell();
 		// PolishSwap(fc);
 		// PolishSwap(fc);
@@ -121,7 +121,7 @@ public class RandomShuffler {
 					+ (currScore - prevScore));
 
 			prevScore = currScore;
-//			PolishSwap(fc);
+			PolishSwap(fc);
 			// if best, set it
 			if (Scores.best == null
 					|| (fc.calculateFlowCellScore() > Scores.best
@@ -166,7 +166,7 @@ public class RandomShuffler {
 		}
 
 		prevScore = currScore;
-//		PolishSwap(fc);
+		PolishSwap(fc);
 		// fc.printFlowCell();
 		swapIter = 0;
 		currScore = fc.calculateFlowCellScore();
@@ -182,7 +182,7 @@ public class RandomShuffler {
 					+ (currScore - prevScore));
 
 			prevScore = currScore;
-//			PolishSwap(fc);
+			PolishSwap(fc);
 			// if best, set it
 			if (Scores.best == null
 					|| (fc.calculateFlowCellScore() > Scores.best

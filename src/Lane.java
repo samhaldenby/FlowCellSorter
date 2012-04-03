@@ -55,7 +55,7 @@ public class Lane {
 			}
 		}
 		
-		reportPools();
+//		reportPools();
 	}
 	
 	public void reportPools(){
@@ -168,7 +168,7 @@ public class Lane {
 		System.out.printf("%d:", laneNumber_);
 		while(iSample.hasNext()){
 			Sample sample = iSample.next();
-			System.out.printf("[%s,%s,%.5f] ",sample.Name(), sample.Barcode(),sample.Reads());
+			System.out.printf("[%s,%s,%s,%.5f] ",sample.Name(), sample.Barcode(),(sample.isPooled() ? Integer.toString(sample.Pool()) : "None"), sample.Reads());
 		}
 		System.out.println();
 		this.calculatePools();
@@ -244,11 +244,16 @@ public class Lane {
 	}
 	
 	
-	public  ArrayList<SampleBundle> calculateSampleBundlePermutations(){
+	public  ArrayList<SampleBundle> calculateSampleBundlePermutations() throws IOException{
+		
+		
+		this.calculatePools();
+		
 //		System.out.printf("\t->Calculating bundles: Lane %d\n", this.laneNumber_);
 		Set<SampleBundle> bundles = new HashSet<SampleBundle>();
 //		BitSet bits = new BitSet(samples.size());
 //		bits =
+		
 		
 		//create new temp set
 		Set<SampleBundle> tempSet = new HashSet<SampleBundle>();
@@ -287,10 +292,55 @@ public class Lane {
 			
 		}
 		
+		//Now do pools
+
+		for(Map.Entry<Integer, SampleBundle> iEntry : pools_.entrySet()){
+			SampleBundle pool = iEntry.getValue();
+
+			//add empty one
+			ArrayList<Sample> newSet = new ArrayList<Sample>();
+			bundles.add(new SampleBundle(newSet));
+			
+			//for each existing bundle
+			Iterator<SampleBundle> iBundle = bundles.iterator();
+			while(iBundle.hasNext()){
+				//create daughter
+				SampleBundle samBun = iBundle.next();
+				ArrayList<Sample> daughter = new ArrayList<Sample>();
+				Iterator<Sample> iSample = samBun.Samples().iterator();
+				while(iSample.hasNext()){
+					daughter.add(iSample.next());
+				}
+				//add current
+				daughter.addAll(pool.Samples());
+//				daughter.add(samples_.get(i));
+				
+				//add to bundle set
+				tempSet.add(new SampleBundle(daughter));
+			}
+			
+			bundles.addAll(tempSet);
+			
+		}
+		
 		
 		//convert to arrayList
 		ArrayList<SampleBundle> list = new ArrayList<SampleBundle>(bundles);
 		Collections.sort(list, new BundleComparator());
+		
+		//report 
+//		int bundleCount =0;
+//		System.out.printf("**** BUNDLES FOR LANE %d ****\n", this.laneNumber_);
+//		for(SampleBundle iBundle : list){
+//			
+//			System.out.printf("%d: ", bundleCount);
+//			for(Sample iSample : iBundle.Samples()){
+//				System.out.printf(" [%s-%s] ", iSample.Name(), (iSample.isPooled() ? Integer.toString(iSample.Pool()) : "None"));
+//			}
+//			System.out.println();
+//		}
+//		
+//		System.in.read();
 //		System.out.println("\t->Done");
 		return list;
 	}
