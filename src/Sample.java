@@ -4,11 +4,14 @@ public class Sample {
 	private String name_;
 	private String barcode_;
 	private double numReads_;
+	private int pool_;
 	
-	public Sample(String name, String barcode, double numReads){
+	public Sample(String name, String barcode, double numReads, int pool){
 		name_ = name;
 		barcode_ = barcode;
 		numReads_ = numReads;
+		pool_ = pool;
+
 	}
 	
 	public String Name(){
@@ -21,5 +24,13 @@ public class Sample {
 	
 	public double Reads(){
 		return numReads_;
+	}
+	
+	public int Pool(){
+		return pool_;
+	}
+	
+	public boolean isPooled(){
+		return (pool_!=Consts.NO_POOL);
 	}
 }

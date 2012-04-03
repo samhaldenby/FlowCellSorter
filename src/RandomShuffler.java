@@ -62,7 +62,7 @@ public class RandomShuffler {
 		// fc.printFlowCell();
 
 		double prevScore = rawScore;
-		Polish2(fc);
+		PolishSingleSamples(fc);
 		// fc.printFlowCell();
 		// Polish2(fc);
 		// Polish2(fc);
@@ -135,7 +135,7 @@ public class RandomShuffler {
 		}
 
 		prevScore = currScore;
-		Polish2(fc);
+		PolishSingleSamples(fc);
 		// fc.printFlowCell();
 		polishIter = 0;
 		currScore = fc.calculateFlowCellScore();
@@ -203,87 +203,9 @@ public class RandomShuffler {
 		return true;
 	}
 
-	private static void Polish(FlowCell fc) {
-		// check if any low content lanes can be jiggled into another lane
 
-		ArrayList<Lane> leastFilledLanes = fc.underFilled();
 
-		Collections.sort(leastFilledLanes, new LaneFullnessComparator());
-
-		// grab least filled NON-EMPTY lane
-		Lane lowest = null;
-		Iterator<Lane> iLow = leastFilledLanes.iterator();
-		while (iLow.hasNext()) {
-			Lane next = iLow.next();
-			if (next.isEmpty()) {
-				continue;
-			} else if (lowest == null
-					|| next.remainingCapacity() > lowest.remainingCapacity()) {
-				System.out.printf("Setting lane %d as lowest (%.2f)\n", next
-						.LaneNumber(), next.remainingCapacity());
-				lowest = next;
-			}
-		}
-
-		for (int u = 0; u < leastFilledLanes.size(); ++u) {
-			System.out.printf("UnderFilled: %d\t%.2f\n", leastFilledLanes
-					.get(u).LaneNumber(), leastFilledLanes.get(u)
-					.remainingCapacity());
-		}
-
-		// check each sample in lowest
-
-		boolean done = false;
-		int attempts = 0;
-		System.out.printf("Lowest lane = %d (%.2f)\n", lowest.LaneNumber(),
-				(lowest.currentFillLevel() / lowest.Capacity()) * 100.0);
-		while (!done) {
-			Iterator<Sample> iSample = lowest.getSamples().iterator();
-			Sample s = iSample.next();
-			System.out.printf("Attempting to move sample of %.2f\n", s.Reads());
-			// take largest from least filled lane (moving towards smallest if
-			// no success)
-			ListIterator<Lane> iLane = leastFilledLanes
-					.listIterator(leastFilledLanes.size());
-			boolean foundTargetLane = false;
-
-			while (iLane.hasPrevious() && !foundTargetLane) {
-
-				// check that lane has the most appropriate underfill that will
-				// accomodate sample
-				Lane lane = iLane.previous();
-				System.out.printf("Lane %d : Remaining capacity: %.2f\n", lane
-						.LaneNumber(), lane.remainingCapacity());
-
-				// don't compare to self!
-				if (lane.LaneNumber() == lowest.LaneNumber()) {
-					continue;
-				}
-				if (s.Reads() <= lane.remainingCapacity()) {
-					System.out
-							.printf(
-									"Sticking %s(%.2f) in laneLane %d : Remaining capacity: %.2f\n",
-									s.Name(), s.Reads(), lane.LaneNumber(),
-									lane.remainingCapacity());
-					foundTargetLane = true;
-
-					// move around!
-					lane.addSample(s);
-					lowest.removeSample(s);
-					continue;
-				}
-
-			}
-
-			if (++attempts == 10) {
-				done = true;
-			}
-
-		}
-
-	}
-
-	public static boolean Polish2(FlowCell fc) {
+	public static boolean PolishSingleSamples(FlowCell fc) {
 		// System.out.println("Polish2");
 		// sort lanes from most full to least full
 		ArrayList<Lane> sortedLanes = fc.NonEmptyLanes();
@@ -319,10 +241,10 @@ public class RandomShuffler {
 				// //store samples for erasing
 				while (iSample.hasNext()) {
 					Sample sample = iSample.next();
-					if (sample.Reads() <= fullest.remainingCapacity()
-							&& !fullest.hasBarcode(sample.Barcode())
-							&& fullest.currentFillLevel() + sample.Reads() > emptiest
-									.currentFillLevel()) {
+					if (sample.Reads() <= fullest.remainingCapacity() && 
+						!sample.isPooled() &&
+						!fullest.hasBarcode(sample.Barcode()) &&
+						fullest.currentFillLevel() + sample.Reads() > emptiest.currentFillLevel()) {
 
 						// donePolishing=true; //just one iteration for
 						// debugging purposes
@@ -367,6 +289,12 @@ public class RandomShuffler {
 		// Scores.best.calculateFlowCellScore()){
 		// Scores.best = fc;
 		// }
+		return true;
+	}
+	
+	public static boolean PolishPooledSamples(FlowCell fc){
+		
+		
 		return true;
 	}
 

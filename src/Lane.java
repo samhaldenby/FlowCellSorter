@@ -2,9 +2,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -13,7 +15,7 @@ public class Lane {
 	private int laneNumber_;
 	private double capacity_;
 	private ArrayList<Sample> samples_ = new ArrayList<Sample>();
-	
+	private HashMap<Integer, SampleBundle> pools_ = new HashMap<Integer, SampleBundle>();
 	
 	
 	public Lane(int laneNumber, double capacity){
@@ -32,7 +34,41 @@ public class Lane {
 	}
 	
 	
+	public void calculatePools(){
+		pools_ = new HashMap<Integer,SampleBundle>();
+		
+		//for each sample, assign to pool
+		Iterator<Sample> iSample = samples_.iterator();
+		while(iSample.hasNext()){
+			Sample sample = iSample.next();
+			if(sample.isPooled()){
+				//check if pool exists in pools_. If not, create it
+				if(!pools_.containsKey(sample.Pool())){
+					ArrayList<Sample> newList = new ArrayList<Sample>();
+					newList.add(sample);
+					pools_.put(sample.Pool(), new SampleBundle(newList));
+				} else {
+					SampleBundle bundle = pools_.get(sample.Pool());
+					bundle.addSample(sample);
+					pools_.put(sample.Pool(), bundle);
+				}
+			}
+		}
+		
+		reportPools();
+	}
 	
+	public void reportPools(){
+		for(Map.Entry<Integer, SampleBundle> iEntry : pools_.entrySet()){
+			System.out.printf("Pool %d: ", iEntry.getKey());
+			for(Sample iSample : iEntry.getValue().Samples()){
+				System.out.printf(" [%s-%s-%d] ",iSample.Name(), iSample.Barcode(), iSample.Pool() );
+			}
+			System.out.println();
+			
+			
+		}
+	}
 	public boolean addSample(Sample sample){
 		//check if sample already exists (DEBUG only)
 		Iterator<Sample> iSample = samples_.iterator();
@@ -129,7 +165,8 @@ public class Lane {
 			Sample sample = iSample.next();
 			System.out.printf("[%s,%s,%.5f] ",sample.Name(), sample.Barcode(),sample.Reads());
 		}
-//		System.out.println();
+		System.out.println();
+		this.calculatePools();
 		
 	}
 	

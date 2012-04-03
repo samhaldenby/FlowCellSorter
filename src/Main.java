@@ -109,10 +109,9 @@ public class Main {
 					System.out.printf("Iters left: %d\tAttempts: %d\tBest: %.5f\n",iter-iterReducedBy, totalTries, bestScore);
 					Scores.best.printFlowCell();
 				}
-				if(Scores.best !=null && prev!=null && Scores.best.calculateFlowCellScore() *1.2f > prev.calculateFlowCellScore()){
-					iter=REQUIRED_ITERATIONS;
-//					System.out.println("RESETTING");
-//					System.in.read();
+				if(Scores.best !=null && prev!=null && (int)Scores.best.calculateFlowCellScore() > (int)prev.calculateFlowCellScore()){
+					System.out.printf("Resetting iter because best (%.2f) > prev (%.2f)\n",Scores.best.calculateFlowCellScore(),prev.calculateFlowCellScore());
+					iter=REQUIRED_ITERATIONS;	
 				} else{
 					--iter;
 				}
@@ -148,11 +147,6 @@ public class Main {
 		
 		Scores.best.printFlowCell();
 		System.out.printf("Num Samples: %d\n", samples.size());
-		
-			
-		
-		
-		
 
 	}
 

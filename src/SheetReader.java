@@ -31,13 +31,18 @@ public class SheetReader {
 				String name = tokens[0];
 				String barcode = tokens[1];
 				double reads = Double.parseDouble(tokens[2]);
+				int pool = Consts.NO_POOL;
+				if(tokens.length>3){
+					pool = Integer.parseInt(tokens[3]);
+				}
+				
 				if(sampleNameMap.containsKey(name)){
 					sampleNameMap.put(name, sampleNameMap.get(name)+1);
 					name = name + "_" + Integer.toString(sampleNameMap.get(name));
 				}else{
 					sampleNameMap.put(name,0);
 				}
-				samples.add(new Sample(name,barcode,reads));
+				samples.add(new Sample(name,barcode,reads, pool));
 			}
 		}
 		return samples;
