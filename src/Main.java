@@ -7,7 +7,7 @@ public class Main {
 
 	final static int NUM_OF_FCS=2;
 	final static double LANE_CAPACITY=1.01;
-	final static int REQUIRED_ITERATIONS=10000;
+	final static int REQUIRED_ITERATIONS=100;
 	static int TRIES_BEFORE_INCREASING_NUM_LANES = 30000;
 	/**
 	 * @param args
@@ -52,6 +52,7 @@ public class Main {
 		
 
 		Display display = new Display();
+//		Scores.display = display;
 		DisplayUpdater du = new DisplayUpdater(display);
 		new Thread(du).start();
 		
@@ -63,7 +64,9 @@ public class Main {
 		
 		
 		double bestScore = 0;
+		FlowCell prev = null;
 		while(iter - iterReducedBy!=0){
+			prev = Scores.best;
 			++tries;
 			++totalTries;
 
@@ -106,7 +109,15 @@ public class Main {
 					System.out.printf("Iters left: %d\tAttempts: %d\tBest: %.5f\n",iter-iterReducedBy, totalTries, bestScore);
 					Scores.best.printFlowCell();
 				}
-				iter--;
+				if(Scores.best !=null && prev!=null && Scores.best.calculateFlowCellScore() *1.2f > prev.calculateFlowCellScore()){
+					iter=REQUIRED_ITERATIONS;
+//					System.out.println("RESETTING");
+//					System.in.read();
+				} else{
+					--iter;
+				}
+				
+				prev = Scores.best;
 				tries=0;
 				
 			}

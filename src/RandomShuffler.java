@@ -84,13 +84,14 @@ public class RandomShuffler {
 					+ (currScore - prevScore));
 
 			prevScore = currScore;
-			Polish2(fc);
+//			Polish2(fc);
 			// if best, set it
 			if (Scores.best == null
 					|| (fc.calculateFlowCellScore() > Scores.best
 							.calculateFlowCellScore() && fc.NumNonEmptyLanes() <= Scores.best
 							.NumNonEmptyLanes())) {
 				Scores.best = fc;
+
 				Scores.best.printFlowCell();
 			}
 			currScore = fc.calculateFlowCellScore();
@@ -149,7 +150,7 @@ public class RandomShuffler {
 					+ (currScore - prevScore));
 
 			prevScore = currScore;
-			Polish2(fc);
+//			Polish2(fc);
 			// if best, set it
 			if (Scores.best == null
 					|| (fc.calculateFlowCellScore() > Scores.best
@@ -285,7 +286,7 @@ public class RandomShuffler {
 	public static boolean Polish2(FlowCell fc) {
 		// System.out.println("Polish2");
 		// sort lanes from most full to least full
-		ArrayList<Lane> sortedLanes = fc.underFilled();
+		ArrayList<Lane> sortedLanes = fc.NonEmptyLanes();
 		Collections.sort(sortedLanes, new LaneFullnessComparator());
 		// System.out.printf("* Sorted lanes by fullness\n");
 
@@ -293,19 +294,21 @@ public class RandomShuffler {
 		// lane
 		boolean donePolishing = false;
 
-		ListIterator<Lane> iLaneR = sortedLanes
-				.listIterator(sortedLanes.size());
+		ListIterator<Lane> iLaneR = sortedLanes.listIterator(sortedLanes.size());
 		while (!donePolishing && iLaneR.hasPrevious()) {
-			if (Scores.best == null
-					|| (fc.calculateFlowCellScore() > Scores.best.calculateFlowCellScore())) {
+			if (Scores.best == null	|| (fc.calculateFlowCellScore() > Scores.best.calculateFlowCellScore())) {
 				Scores.best = fc;
 				Scores.best.printFlowCell();
 			}
 			Lane fullest = iLaneR.previous();
-			// System.out.printf("Attempting to move stuff to lane %d (%.2f)\n",
-			// fullest.LaneNumber(),fullest.remainingCapacity());
+			
+			if(fullest.isEmpty()){
+				break;
+			}
+
+			
 			ListIterator<Lane> iLaneF = sortedLanes.listIterator();
-			boolean searchForGapComplete = false;
+
 			while (iLaneF.hasNext()/* && !searchForGapComplete */) {
 				Lane emptiest = iLaneF.next();
 				// check each sample in lane to see if any will fit in gap in
@@ -329,7 +332,7 @@ public class RandomShuffler {
 							// System.out.printf("Found slot [%d : %.2f]-> [%d : %.2f]\n",emptiest.LaneNumber(),
 							// sample.Reads(), fullest.LaneNumber(),
 							// fullest.remainingCapacity());
-							searchForGapComplete = true;
+//							searchForGapComplete = true;
 							fullest.addSample(sample);
 							iSample.remove();
 							
@@ -367,7 +370,237 @@ public class RandomShuffler {
 		return true;
 	}
 
+	
 	public static boolean PolishSwap(FlowCell fc) throws IOException {
+		// System.out.println(" *** POLISH SWAP *** ");
+		// fc.printFlowCell();
+		// sort lanes from full->empty
+		ArrayList<Lane> sortedLanes = fc.NonEmptyLanes();
+		Collections.sort(sortedLanes, new LaneFullnessComparator());
+
+		// System.out.printf("Test: Fullest lane is: %.2f\n",sortedLanes.get(sortedLanes.size()-1).currentFillLevel());
+
+		// starting with fullest lane and working towards least full, see if any
+		// other lane has anything it can take
+		ListIterator<Lane> iFuller = sortedLanes.listIterator(sortedLanes
+				.size());
+		while (iFuller.hasPrevious()) {
+			boolean doneForThisSample = false;
+			Lane fuller = iFuller.previous();
+			
+			//only continue if not totally full! //TODO: Change this so min size left required is size of smallest sample
+			if (fuller.currentFillLevel() > 0.99 * fuller.Capacity()){
+				continue;
+			}
+
+			// System.out.printf("Attempting to gap fill on lane %d (%.2f)",fuller.LaneNumber(),
+			// fuller.currentFillLevel());
+			// fuller.printLane();
+			// System.out.println();
+
+			// Calculate bundles from fuller
+			ArrayList<SampleBundle> fullerBundles = fuller
+					.calculateSampleBundlePermutations();
+			// Consider swapping out each sample in turn from fullest and see if
+			// a better one can be found
+
+			// starting with the emptiest lane and working towards the fullest,
+			// check for bundles to grab
+			Iterator<Lane> iEmptier = sortedLanes.iterator();
+			while (iEmptier.hasNext()) {
+
+				Lane emptier = iEmptier.next();
+
+				// don't proceed if emptier == fuller!
+				if (emptier.LaneNumber() == fuller.LaneNumber()) {
+					continue;
+				}
+
+				// check emptier isn't empty!
+				if (emptier.isEmpty()) {
+					continue;
+				}
+				// don't proceed if emptier is fuller than fuller!
+				if (emptier.currentFillLevel() > fuller.currentFillLevel()) {
+					continue;	//TODO This could probably safely be a break, not a continue
+//					break;	
+				}
+
+				// System.out.printf("\tGrabbing from lane %d (%.2f)",emptier.LaneNumber(),
+				// emptier.currentFillLevel());
+				// emptier.printLane();
+				// System.out.println();
+
+				// if all is fine, calculate emptier bundles
+				ArrayList<SampleBundle> emptierBundles = emptier
+						.calculateSampleBundlePermutations();
+
+				Iterator<SampleBundle> iFullerBundles = fullerBundles
+						.iterator();
+
+				// compare
+				while (iFullerBundles.hasNext()) {
+
+					SampleBundle fullerBundle = iFullerBundles.next();
+					// System.out.printf("\t\tComparing bundle from fuller %.2f\n",fullerBundle.Size());
+					Iterator<SampleBundle> iEmptierBundles = emptierBundles
+							.iterator();
+
+					while (iEmptierBundles.hasNext()) {
+						SampleBundle emptierBundle = iEmptierBundles.next();
+						// System.out.printf("\t\t\tTo emptier %.2f\n",emptierBundle.Size());
+						// check (1) that replacing the sample with the bundle
+						// would be better and (b) that it won't exceed
+						// capacity)
+						double fullerSizeAfterSwap = fuller.currentFillLevel()
+								- fullerBundle.Size() + emptierBundle.Size();
+						double emptierSizeAfterSwap = emptier
+								.currentFillLevel()
+								- emptierBundle.Size() + fullerBundle.Size();
+
+						// System.out.println("______________________");
+						// System.out.printf("Checking barcode swap\n");
+						// fc.printFlowCell();
+						// System.out.printf("Fuller: "); fuller.printLane();
+						// System.out.printf("Single: %s\n",
+						// fromFuller.Barcode());
+						// System.out.printf("Emptier: "); emptier.printLane();
+						// System.out.printf("bundle: "); bundle.printBundle();
+						// System.out.printf("FullerSizeAfterSwap: %.2f\n",
+						// fullerSizeAfterSwap);
+						// System.out.printf("EmptierSizeAfterSwap: %.2f\n",
+						// emptierSizeAfterSwap);
+						if (fullerSizeAfterSwap < fuller.Capacity()
+								&& fullerSizeAfterSwap > emptierSizeAfterSwap
+								&& fullerSizeAfterSwap > fuller
+										.currentFillLevel())
+						// if(bundle.Size() - fromFuller.Reads() > 0 &&
+						// bundle.Size() + fuller.currentFillLevel() -
+						// fromFuller.Reads() <= fuller.Capacity())
+						{
+							// TODO: Check barcodes!!!
+							// check barcode situation
+							// 1) if bundle has same barcode as single, that's
+							// fine for the receiver of the single
+							// OR if emptier doesn't contain that barcode at all
+							ArrayList<Sample> s2eSharedSamples = emptier
+									.getSharedBarcodes(fullerBundle.Samples());
+							boolean singleToEmptyOk = s2eSharedSamples.size() == (fullerBundle
+									.getSharedBarcodes(emptierBundle.Samples())
+									.size()); // i.e. if number of barcodes
+												// shared between fBundle and
+												// empty is the same as number
+												// of barcodes shared between
+												// fBundle and eBundle
+							// boolean singleToEmptyOk =
+							// (bundle.containsBarcode(fromFuller.Barcode()) ||
+							// !emptier.hasBarcode(fromFuller.Barcode()));
+							// 2) if fuller has none of the barcodes contained
+							// in bundle, that's ok to receive
+							// OR if there is ONE shared barcode, but that
+							// barcode in fuller is migrating out to emptier
+							// (kind of a swap).
+							ArrayList<Sample> sharedSamples = fuller
+									.getSharedBarcodes(emptierBundle.Samples());
+							boolean bundleToFullOk = (sharedSamples.size() == emptierBundle
+									.getSharedBarcodes(fullerBundle.Samples())
+									.size());
+
+							// System.out.println("______________________");
+							// System.out.printf("Checking barcode swap\n");
+							// fc.printFlowCell();
+							// System.out.printf("Fuller: ");
+							// fuller.printLane();
+							// System.out.printf("Single: %s\n",
+							// fromFuller.Barcode());
+							// System.out.printf("Emptier: ");
+							// emptier.printLane();
+							// System.out.printf("bundle: ");
+							// bundle.printBundle();
+							//							
+							// System.out.printf("SingleToEmptyOk? %s\n",
+							// singleToEmptyOk);
+							// System.out.printf("BundleToFullOk?  %s\n",
+							// bundleToFullOk);
+
+							if (singleToEmptyOk && bundleToFullOk) {
+								// addBundle
+								if (!fuller.addBundle(emptierBundle)) {
+									System.out
+											.printf("ERROR: duplicate sample while adding emptier bundle to fuller\n");
+									System.in.read();
+								}
+								for (int i = 0; i < emptierBundle.Samples()
+										.size(); ++i) {
+									emptier.removeSample(emptierBundle
+											.Samples().get(i));
+								}
+								if (emptierBundle.Size() == 0) {
+									System.out
+											.println("Empty bundle from emptier!");
+								}
+								iEmptierBundles.remove();
+
+								if (!emptier.addBundle(fullerBundle)) {
+									System.out
+											.printf("ERROR: duplicate sample while adding fuller bundle to empty\n");
+									System.in.read();
+								}
+								for (int i = 0; i < fullerBundle.Samples()
+										.size(); ++i) {
+									fuller.removeSample(fullerBundle.Samples()
+											.get(i));
+								}
+
+								// System.out.println("Successful swap!");
+								// fc.printFlowCell();
+
+								doneForThisSample = true;
+							}
+							// System.out.println("______________________");
+							// System.in.read();
+							// System.out.printf("Found match: Bundle ");
+							// bundle.printBundle();
+							// System.out.printf(" from lane %d (%.2f)",emptier.LaneNumber(),
+							// emptier.currentFillLevel());
+							// System.out.printf(" in exchange for %.2f from lane %d\n",fromFuller.Reads(),
+							// fuller.LaneNumber());
+
+							// System.in.read();
+
+						}
+
+						if (doneForThisSample)
+							break;
+					}
+					if (doneForThisSample) {
+						// // iFromFuller.remove();
+						break;
+					}
+
+				}
+				if (doneForThisSample) {
+					// // iFromFuller.remove();
+					break;
+				}
+			}
+			if (doneForThisSample) {
+				// // iFromFuller.remove();
+				break;
+			}
+
+		}
+
+		if (Scores.best == null
+				|| (fc.calculateFlowCellScore() > Scores.best.calculateFlowCellScore())) {
+			Scores.best = fc;
+			Scores.best.printFlowCell();
+		}
+		return true;
+	}
+	
+	
+	public static boolean PolishSwapBak(FlowCell fc) throws IOException {
 		// System.out.println(" *** POLISH SWAP *** ");
 		// fc.printFlowCell();
 		// sort lanes from full->empty
@@ -589,214 +822,9 @@ public class RandomShuffler {
 		return true;
 	}
 
-	public static boolean PolishSwapBak(FlowCell fc) throws IOException {
-		System.out.println(" *** POLISH SWAP *** ");
-//		fc.printFlowCell();
-		// sort lanes from full->empty
-		ArrayList<Lane> sortedLanes = fc.getLanes();
-		Collections.sort(sortedLanes, new LaneFullnessComparator());
-
-		// System.out.printf("Test: Fullest lane is: %.2f\n",sortedLanes.get(sortedLanes.size()-1).currentFillLevel());
-
-		// starting with fullest lane and working towards least full, see if any
-		// other lane has anything it can take
-		ListIterator<Lane> iFuller = sortedLanes.listIterator(sortedLanes
-				.size());
-		while (iFuller.hasPrevious()) {
-			boolean doneForThisSample = false;
-			Lane fuller = iFuller.previous();
-
-			// System.out.printf("Attempting to gap fill on lane %d (%.2f)",fuller.LaneNumber(),
-			// fuller.currentFillLevel());
-			// fuller.printLane();
-			// System.out.println();
-
-			// Calculate bundles from fuller
-			ArrayList<SampleBundle> fullerBundles = fuller
-					.calculateSampleBundlePermutations();
-			// Consider swapping out each sample in turn from fullest and see if
-			// a better one can be found
-			Iterator<SampleBundle> iFullerBundles = fullerBundles.iterator();
-			while (iFullerBundles.hasNext()) {
-				// DEBUG AND CHECK THIS!
-
-				SampleBundle fromFuller = iFullerBundles.next();
-
-				// starting with the emptiest lane and working towards the
-				// fullest, check for bundles to grab
-				Iterator<Lane> iEmptier = sortedLanes.iterator();
-				while (iEmptier.hasNext()) {
-					Lane emptier = iEmptier.next();
-
-					// don't proceed if emptier == fuller!
-					if (emptier.LaneNumber() == fuller.LaneNumber()) {
-						continue;
-					}
-
-					// don't proceed if emptier is fuller than fuller!
-					if (emptier.currentFillLevel() > fuller.currentFillLevel()) {
-						continue;
-					}
-
-					// check emptier isn't empty
-					if (emptier.isEmpty()) {
-						continue;
-					}
-
-					// get bundles!
-					ArrayList<SampleBundle> emptierBundles = emptier
-							.calculateSampleBundlePermutations();
-					// check each bundle from large to small to see which will
-					// fit
-					Iterator<SampleBundle> iEmptierBundles = emptierBundles
-							.iterator();
-					while (iEmptierBundles.hasNext()) {
-						SampleBundle bundle = iEmptierBundles.next();
-						// check (1) that replacing the sample with the bundle
-						// would be better and (b) that it won't exceed
-						// capacity)
-						double fullerSizeAfterSwap = fuller.currentFillLevel()
-								- fromFuller.Size() + bundle.Size();
-						double emptierSizeAfterSwap = emptier
-								.currentFillLevel()
-								- bundle.Size() + fromFuller.Size();
-
-						// System.out.println("______________________");
-						// System.out.printf("Checking barcode swap\n");
-						// fc.printFlowCell();
-						// System.out.printf("Fuller: "); fuller.printLane();
-						// System.out.printf("Single: %s\n",
-						// fromFuller.Barcode());
-						// System.out.printf("Emptier: "); emptier.printLane();
-						// System.out.printf("bundle: "); bundle.printBundle();
-						// System.out.printf("FullerSizeAfterSwap: %.2f\n",
-						// fullerSizeAfterSwap);
-						// System.out.printf("EmptierSizeAfterSwap: %.2f\n",
-						// emptierSizeAfterSwap);
-						if (fullerSizeAfterSwap < fuller.Capacity()
-								&& fullerSizeAfterSwap > emptierSizeAfterSwap
-								&& fullerSizeAfterSwap > fuller
-										.currentFillLevel())
-						// if(bundle.Size() - fromFuller.Reads() > 0 &&
-						// bundle.Size() + fuller.currentFillLevel() -
-						// fromFuller.Reads() <= fuller.Capacity())
-						{
-							// TODO: Check barcodes!!!
-							// check barcode situation
-							// 1) if bundle has same barcode as single, that's
-							// fine for the receiver of the single
-							// OR if emptier doesn't contain that barcode at all
-							ArrayList<Sample> s2eSharedSamples = emptier
-									.getSharedBarcodes(fromFuller.Samples());
-							boolean singleToEmptyOk = s2eSharedSamples.size() == (fromFuller
-									.getSharedBarcodes(bundle.Samples()).size()); // i.e.
-																					// if
-																					// number
-																					// of
-																					// barcodes
-																					// shared
-																					// between
-																					// fBundle
-																					// and
-																					// empty
-																					// is
-																					// the
-																					// same
-																					// as
-																					// number
-																					// of
-																					// barcodes
-																					// shared
-																					// between
-																					// fBundle
-																					// and
-																					// eBundle
-							// boolean singleToEmptyOk =
-							// (bundle.containsBarcode(fromFuller.Barcode()) ||
-							// !emptier.hasBarcode(fromFuller.Barcode()));
-							// 2) if fuller has none of the barcodes contained
-							// in bundle, that's ok to receive
-							// OR if there is ONE shared barcode, but that
-							// barcode in fuller is migrating out to emptier
-							// (kind of a swap).
-							ArrayList<Sample> sharedSamples = fuller
-									.getSharedBarcodes(bundle.Samples());
-							boolean bundleToFullOk = (sharedSamples.size() == bundle
-									.getSharedBarcodes(fromFuller.Samples())
-									.size());
-
-							// System.out.println("______________________");
-							// System.out.printf("Checking barcode swap\n");
-							// fc.printFlowCell();
-							// System.out.printf("Fuller: ");
-							// fuller.printLane();
-							// System.out.printf("Single: %s\n",
-							// fromFuller.Barcode());
-							// System.out.printf("Emptier: ");
-							// emptier.printLane();
-							// System.out.printf("bundle: ");
-							// bundle.printBundle();
-							//							
-							// System.out.printf("SingleToEmptyOk? %s\n",
-							// singleToEmptyOk);
-							// System.out.printf("BundleToFullOk?  %s\n",
-							// bundleToFullOk);
-
-							if (singleToEmptyOk && bundleToFullOk) {
-								// addBundle
-								fuller.addBundle(bundle);
-								for (int i = 0; i < bundle.Samples().size(); ++i) {
-									emptier.removeSample(bundle.Samples()
-											.get(i));
-								}
-								iEmptierBundles.remove();
-
-								emptier.addBundle(fromFuller);
-								for (int i = 0; i < fromFuller.Samples().size(); ++i) {
-									fuller.removeSample(fromFuller.Samples()
-											.get(i));
-								}
-
-								// System.out.println("Successful swap!");
-								// fc.printFlowCell();
-
-								doneForThisSample = true;
-							}
-							// System.out.println("______________________");
-							// System.in.read();
-							// System.out.printf("Found match: Bundle ");
-							// bundle.printBundle();
-							// System.out.printf(" from lane %d (%.2f)",emptier.LaneNumber(),
-							// emptier.currentFillLevel());
-							// System.out.printf(" in exchange for %.2f from lane %d\n",fromFuller.Reads(),
-							// fuller.LaneNumber());
-
-							// System.in.read();
-
-						}
-
-						if (doneForThisSample)
-							break;
-					}
-					if (doneForThisSample)
-						break;
-				}
-				if (doneForThisSample) {
-					// iFromFuller.remove();
-					break;
-				}
-			}
-
-		}
-
-		if (Scores.best == null
-				|| (fc.calculateFlowCellScore() > Scores.best
-						.calculateFlowCellScore() && fc.NumNonEmptyLanes() <= Scores.best
-						.NumNonEmptyLanes())) {
-			Scores.best = fc;
-		}
-		return true;
-	}
+	
+	
+	
 
 	public static boolean randomSwap(FlowCell fc) throws IOException {
 
