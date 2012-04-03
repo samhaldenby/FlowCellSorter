@@ -69,7 +69,9 @@ public class Display extends JFrame{
 				while(iSample.hasNext()){
 					Sample sample = iSample.next();
 //					System.out.printf("%s = %d\n",sample.Barcode(), sample.Barcode().hashCode());
-					g.setColor(new Color(sample.Barcode().hashCode()+ Integer.MAX_VALUE/2));
+//					g.setColor(new Color(sample.Barcode().hashCode()+ Integer.MAX_VALUE/2));
+					g.setColor(new Color((int)Math.pow(sample.Pool(),2.5)+ Integer.MAX_VALUE/2));
+					g.setColor(new Color((int)sample.Pool()*5000+ Integer.MAX_VALUE/2));
 					int len = (int)(sample.Reads()*FC_LENGTH);
 					g.fillRect(currPos, (FC_WIDTH/numLanes)*l + 35, len, FC_WIDTH/numLanes);
 					g.setColor(Color.BLACK);

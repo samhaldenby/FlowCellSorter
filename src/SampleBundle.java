@@ -39,6 +39,7 @@ public class SampleBundle {
 		}
 		
 		samples_.add(sample);
+		size_+=sample.Reads();
 		return true;
 	}
 	

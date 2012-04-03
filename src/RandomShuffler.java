@@ -206,7 +206,7 @@ public class RandomShuffler {
 
 
 
-	public static boolean Polish(FlowCell fc) {
+	public static boolean Polish(FlowCell fc) throws IOException {
 
 		// sort lanes from most full to least full
 		ArrayList<Lane> sortedLanes = fc.NonEmptyLanes();
@@ -248,7 +248,8 @@ public class RandomShuffler {
 						if (iPool.Size() <= fullest.remainingCapacity() && 
 							fullest.getSharedBarcodes(iPool.Samples()).size()==0 &&
 							fullest.currentFillLevel() + iPool.Size() > emptiest.currentFillLevel()) {
-							
+//							System.out.printf("POOL MOVING: %d[%.2f]->%d[%.2f (%.2f)]\n",emptiest.LaneNumber(), iPool.Size(), fullest.LaneNumber(), fullest.currentFillLevel(), fullest.remainingCapacity());
+//							System.in.read();
 							if(fullest.LaneNumber()!=emptiest.LaneNumber()){//TODO: This is in a ridiculous place. Put it BEFORE doing the more heavy calculations
 								fullest.addBundle(iPool);
 								fullest.calculatePools(); //best to recalculate as soon as something changes

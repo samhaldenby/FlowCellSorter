@@ -8,12 +8,13 @@ import java.util.Set;
 
 public class SampleSheetRandomiser {
 	
-	private static int NUM_POOLS = 10;
-	private static float CHANCE_OF_POOLING=0.75f;
+	private static int NUM_SAMPLES =2000;
+	private static int NUM_POOLS = NUM_SAMPLES*2;
+	private static float CHANCE_OF_POOLING=0.8f;
 	
 	public static ArrayList<Sample> create() throws IOException{
 		ArrayList<Sample> samples = new ArrayList<Sample>();
-		int numOfSamples = (int)(Math.random()*1+30);
+		int numOfSamples = (int)(Math.random()*1+NUM_SAMPLES);
 		
 		float num = 0.66f;
 		HashMap<Integer,HashSet<String>> poolHash = new HashMap<Integer,HashSet<String>>();
