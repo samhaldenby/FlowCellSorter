@@ -129,6 +129,11 @@ public class Lane {
 	}
 	
 	
+	public HashMap<Integer,SampleBundle> Pools(){
+		return pools_;
+	}
+	
+	
 	
 	public Sample getSmallestSampleToEnsureNoOverFill(){
 		System.out.printf("\nGrabbing smallest sample to ensure no overfill in lane (%d)\n",this.LaneNumber());

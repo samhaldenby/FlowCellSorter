@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.ListIterator;
+import java.util.Map;
 
 public class RandomShuffler {
 
@@ -206,36 +207,64 @@ public class RandomShuffler {
 
 
 	public static boolean PolishSingleSamples(FlowCell fc) {
-		// System.out.println("Polish2");
+
 		// sort lanes from most full to least full
 		ArrayList<Lane> sortedLanes = fc.NonEmptyLanes();
 		Collections.sort(sortedLanes, new LaneFullnessComparator());
-		// System.out.printf("* Sorted lanes by fullness\n");
 
-		// starting from full to least full, try and squeeze samples into gap on
-		// lane
+
+		// starting from full to least full, try and squeeze samples into gap on fullestlane
 		boolean donePolishing = false;
 
-		ListIterator<Lane> iLaneR = sortedLanes.listIterator(sortedLanes.size());
-		while (!donePolishing && iLaneR.hasPrevious()) {
+		ListIterator<Lane> iFuller = sortedLanes.listIterator(sortedLanes.size());
+		while (!donePolishing && iFuller.hasPrevious()) {
+			
+			//update best flowcell if required
 			if (Scores.best == null	|| (fc.calculateFlowCellScore() > Scores.best.calculateFlowCellScore())) {
 				Scores.best = fc;
 				Scores.best.printFlowCell();
 			}
-			Lane fullest = iLaneR.previous();
+			Lane fullest = iFuller.previous();
 			
 			if(fullest.isEmpty()){
 				break;
 			}
 
 			
-			ListIterator<Lane> iLaneF = sortedLanes.listIterator();
+			ListIterator<Lane> iEmptier = sortedLanes.listIterator();
 
-			while (iLaneF.hasNext()/* && !searchForGapComplete */) {
-				Lane emptiest = iLaneF.next();
+			while (iEmptier.hasNext()/* && !searchForGapComplete */) {
+				Lane emptiest = iEmptier.next();
+			
 				// check each sample in lane to see if any will fit in gap in
 				// fullest lane
-
+				
+				//first, try shifting pools rather than individual samples
+				boolean moreBundlesToProcess = true;
+				while(moreBundlesToProcess){
+					moreBundlesToProcess=false;
+					emptiest.calculatePools();
+					for(SampleBundle iPool : emptiest.Pools().values()){
+						if (iPool.Size() <= fullest.remainingCapacity() && 
+							fullest.getSharedBarcodes(iPool.Samples()).size()>0 &&
+							fullest.currentFillLevel() + iPool.Size() > emptiest.currentFillLevel()) {
+							
+							if(fullest.LaneNumber()!=emptiest.LaneNumber()){//TODO: This is in a ridiculous place. Put it BEFORE doing the more heavy calculations
+								fullest.addBundle(iPool);
+								fullest.calculatePools(); //best to recalculate as soon as something changes
+								
+								for(Sample iSampleToRemove : iPool.Samples()){	//TODO: This could be better with a removePool(int) method
+									emptiest.removeSample(iSampleToRemove);
+								}
+								emptiest.calculatePools();
+								moreBundlesToProcess=true;
+							}
+						}
+					}		
+				}
+				
+					
+				
 				Iterator<Sample> iSample = emptiest.getSamples().iterator();
 				// ArrayList<Sample> samplesToRemove = new ArrayList<Sample>();
 				// //store samples for erasing
@@ -245,12 +274,14 @@ public class RandomShuffler {
 						!sample.isPooled() &&
 						!fullest.hasBarcode(sample.Barcode()) &&
 						fullest.currentFillLevel() + sample.Reads() > emptiest.currentFillLevel()) {
-
+							
+							
+							
 						// donePolishing=true; //just one iteration for
 						// debugging purposes
 
 						// final check that we're not comparing lane with itself
-						if (fullest.LaneNumber() != emptiest.LaneNumber()) {
+						if (fullest.LaneNumber() != emptiest.LaneNumber()) {	//TODO: This is in a ridiculous place. Put it BEFORE doing the more heavy calculations
 							// System.out.printf("Found slot [%d : %.2f]-> [%d : %.2f]\n",emptiest.LaneNumber(),
 							// sample.Reads(), fullest.LaneNumber(),
 							// fullest.remainingCapacity());
