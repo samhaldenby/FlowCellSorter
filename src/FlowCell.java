@@ -1,7 +1,9 @@
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 public class FlowCell {
 	private int numLanes_;
@@ -10,31 +12,74 @@ public class FlowCell {
 	private double capacityPerLane_;
 	private double maxScore_;
 
-	public FlowCell(int numLanes, double capacityPerLane) {
+	public FlowCell(double capacityPerLane) {
 		// announce
 		// System.out.printf("Creating FlowCell (lanes=%d, capacityPerLane=%.2f)\n",numLanes,
 		// capacityPerLane);
-		numLanes_ = numLanes;
+//		numLanes_ = numLanes;
 		capacityPerLane_ = capacityPerLane;
-		capacity_ = numLanes_ * capacityPerLane;
+//		capacity_ = numLanes_ * capacityPerLane;
 
-		// create lanes
-		for (int l = 0; l < numLanes; ++l) {
-			lanes_.add(new Lane(l, capacityPerLane));
-		}
+//		// create lanes
+//		for (int l = 0; l < numLanes; ++l) {
+//			lanes_.add(new Lane(l, capacityPerLane));
+//		}
 	}
 
 	public boolean initialAddSamples(ArrayList<Sample> samples) throws IOException {
 		//DEBUG
-		lanes_ = new ArrayList<Lane>();
-		Iterator<Sample> iSample = samples.iterator();
+		
+		//First, create two lots of samples: a map of pooled bundles and a list of unpooled samples
+		HashMap<Integer,SampleBundle> pools = new HashMap<Integer,SampleBundle>();
+		ArrayList<Sample> unpooled = new ArrayList<Sample>();
+		
+		//for each sample, assign to pool
+		for(Sample iSample : samples){
+			if(iSample.isPooled()){
+				if(!pools.containsKey(iSample.Pool())){
+					ArrayList<Sample> newList = new ArrayList<Sample>();
+					newList.add(iSample);
+					pools.put(iSample.Pool(), new SampleBundle(newList));
+				} else {
+					SampleBundle bundle = pools.get(iSample.Pool());
+					bundle.addSample(iSample);
+					pools.put(iSample.Pool(), bundle);
+				}
+			} else{
+				unpooled.add(iSample);
+			}
+
+		}
+		
+		//now add pools to lanes
+		
 		int laneNum=0;
-		while (iSample.hasNext()) {
-			Sample sample = iSample.next();
+		lanes_ = new ArrayList<Lane>();
+		for(Map.Entry<Integer, SampleBundle> iEntry : pools.entrySet()){
 			lanes_.add(new Lane(laneNum, capacityPerLane_));
-			lanes_.get(laneNum).addSample(sample);
+			lanes_.get(laneNum).addBundle(iEntry.getValue());
 			++laneNum;
 		}
+		
+		//now add individual samples
+		for(Sample iSample : unpooled){
+			lanes_.add(new Lane(laneNum, capacityPerLane_));
+			lanes_.get(laneNum).addSample(iSample);
+			++laneNum;
+		}
+		
+			
+			
+			
+			
+//			Iterator<Sample> iSample = samples.iterator();
+//		int laneNum=0;
+//		while (iSample.hasNext()) {
+//			Sample sample = iSample.next();
+//			lanes_.add(new Lane(laneNum, capacityPerLane_));
+//			lanes_.get(laneNum).addSample(sample);
+//			++laneNum;
+//		}
 		//END DEBUG
 //		Iterator<Sample> iSample = samples.iterator();
 //		while (iSample.hasNext()) {
@@ -60,6 +105,7 @@ public class FlowCell {
 		
 		//calculate max score
 		maxScore_ = this.calculateMaxPossibleScore();
+		
 //		System.in.read();
 		return true;
 	}

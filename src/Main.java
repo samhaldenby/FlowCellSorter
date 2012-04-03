@@ -70,7 +70,8 @@ public class Main {
 			++tries;
 			++totalTries;
 
-			FlowCell flowCell = new FlowCell(numLanesRequired,LANE_CAPACITY);
+//			FlowCell flowCell = new FlowCell(numLanesRequired,LANE_CAPACITY);
+			FlowCell flowCell = new FlowCell(LANE_CAPACITY);
 			
 			//add samples
 			int initAddAttempts = 0;

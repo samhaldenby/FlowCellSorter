@@ -253,6 +253,57 @@ public class Lane {
 		//create new temp set
 		Set<SampleBundle> tempSet = new HashSet<SampleBundle>();
 		
+		//First, do samples that are not in bundles
+		//do first one
+		for (int i =0; i<samples_.size(); ++i){
+			
+			if(!samples_.get(i).isPooled()){
+				//add empty one
+				ArrayList<Sample> newSet = new ArrayList<Sample>();
+				bundles.add(new SampleBundle(newSet));
+				
+				//for each existing bundle
+				Iterator<SampleBundle> iBundle = bundles.iterator();
+				while(iBundle.hasNext()){
+					//create daughter
+					SampleBundle samBun = iBundle.next();
+					ArrayList<Sample> daughter = new ArrayList<Sample>();
+					Iterator<Sample> iSample = samBun.Samples().iterator();
+					while(iSample.hasNext()){
+						daughter.add(iSample.next());
+					}
+					//add current
+					daughter.add(samples_.get(i));
+					
+					//add to bundle set
+					tempSet.add(new SampleBundle(daughter));
+				}
+
+				
+			}
+			
+			bundles.addAll(tempSet);
+
+			
+		}
+		
+		
+		//convert to arrayList
+		ArrayList<SampleBundle> list = new ArrayList<SampleBundle>(bundles);
+		Collections.sort(list, new BundleComparator());
+//		System.out.println("\t->Done");
+		return list;
+	}
+	
+	public  ArrayList<SampleBundle> calculateSampleBundlePermutationsBak(){
+//		System.out.printf("\t->Calculating bundles: Lane %d\n", this.laneNumber_);
+		Set<SampleBundle> bundles = new HashSet<SampleBundle>();
+//		BitSet bits = new BitSet(samples.size());
+//		bits =
+		
+		//create new temp set
+		Set<SampleBundle> tempSet = new HashSet<SampleBundle>();
+		
 		//do first one
 		for (int i =0; i<samples_.size(); ++i){
 			

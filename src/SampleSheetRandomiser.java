@@ -8,11 +8,11 @@ import java.util.Set;
 
 public class SampleSheetRandomiser {
 	
-	private static int NUM_POOLS = 10;
+	private static int NUM_POOLS = 20;
 	
 	public static ArrayList<Sample> create() throws IOException{
 		ArrayList<Sample> samples = new ArrayList<Sample>();
-		int numOfSamples = (int)(Math.random()*1+48);
+		int numOfSamples = (int)(Math.random()*1+20);
 		
 		float num = 0.66f;
 		HashMap<Integer,HashSet<String>> poolHash = new HashMap<Integer,HashSet<String>>();
@@ -82,7 +82,7 @@ public class SampleSheetRandomiser {
 			else if(rnd==3) num=0.33f;
 			else if(rnd==4) num=0.1f;
 			else if (rnd==5) num=0.15f;
-//			num = r.nextFloat();
+			num = r.nextFloat() * 0.5f;
 //			num=1.0f/6.0f;
 //			num=0.199f;
 //			num = (int)(r.nextFloat() * 20) / 20.0f;
