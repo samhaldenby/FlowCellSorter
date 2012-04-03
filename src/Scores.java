@@ -13,6 +13,8 @@ public class Scores {
 	public static double totS2ToS3 =0.0f;
 	public static FlowCell best = null;
 	
+	public static Display display_ ;
+	
 	
 	//fail rates
 	public static int initFail = 0;
@@ -22,7 +24,18 @@ public class Scores {
 	
 	public static int counts=0;
 
+	public static void updateBest(FlowCell fc){
+		
+		if (best == null){
+			best = fc;
+		}
+		else if(fc.calculateFlowCellScore() > best.calculateFlowCellScore()){
+			best = fc;
+		}
 
+//		display_.update();
+		
+	}
 	
 	public static void report(){
 		System.out.printf("Polish: ");

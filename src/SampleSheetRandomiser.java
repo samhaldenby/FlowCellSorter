@@ -8,9 +8,9 @@ import java.util.Set;
 
 public class SampleSheetRandomiser {
 	
-	private static int NUM_SAMPLES =2000;
-	private static int NUM_POOLS = NUM_SAMPLES*2;
-	private static float CHANCE_OF_POOLING=0.8f;
+	private static int NUM_SAMPLES =500;
+	private static int NUM_POOLS = NUM_SAMPLES*20;
+	private static float CHANCE_OF_POOLING=0.0f;
 	
 	public static ArrayList<Sample> create() throws IOException{
 		ArrayList<Sample> samples = new ArrayList<Sample>();
@@ -83,8 +83,8 @@ public class SampleSheetRandomiser {
 			else if(rnd==2) num=0.5f;
 			else if(rnd==3) num=0.33f;
 			else if(rnd==4) num=0.1f;
-			else if (rnd==5) num=0.15f;
-			num = r.nextFloat() * 0.5f;
+			else if (rnd==5) num=0.75f;
+			num = r.nextFloat();
 //			num=1.0f/6.0f;
 //			num=0.199f;
 //			num = (int)(r.nextFloat() * 20) / 20.0f;

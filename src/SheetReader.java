@@ -1,6 +1,8 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -25,8 +27,9 @@ public class SheetReader {
 		String line;
 		
 		while((line = br.readLine()) != null){
+			System.out.println(line);
 			String[] tokens = line.split("\t");
-			if(tokens.length==3){
+			if(tokens.length>=3){
 				//check if it's already in map
 				String name = tokens[0];
 				String barcode = tokens[1];
@@ -45,6 +48,20 @@ public class SheetReader {
 				samples.add(new Sample(name,barcode,reads, pool));
 			}
 		}
+		System.out.printf("There are %d samples loaded!\n", samples.size());
 		return samples;
+	}
+	
+	
+	public static void write(ArrayList<Sample> samples, String fileName) throws IOException{
+		 FileWriter fstream = new FileWriter(fileName);
+		 BufferedWriter out = new BufferedWriter(fstream);
+		 
+		 for(Sample s : samples){
+			 out.write(s.Name()+"\t"+s.Barcode()+"\t"+s.Reads()+"\t"+s.Pool()+"\n");
+		 }
+		 
+		 out.close();
+		
 	}
 }

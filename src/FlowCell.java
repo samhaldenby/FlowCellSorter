@@ -11,13 +11,15 @@ public class FlowCell {
 	private double capacity_;
 	private double capacityPerLane_;
 	private double maxScore_;
+	private Display display_;
 
-	public FlowCell(double capacityPerLane) {
+	public FlowCell(double capacityPerLane, Display display) {
 		// announce
 		// System.out.printf("Creating FlowCell (lanes=%d, capacityPerLane=%.2f)\n",numLanes,
 		// capacityPerLane);
 //		numLanes_ = numLanes;
 		capacityPerLane_ = capacityPerLane;
+		display_ = display;
 //		capacity_ = numLanes_ * capacityPerLane;
 
 //		// create lanes
@@ -208,6 +210,8 @@ public class FlowCell {
 		
 
 		}
+		
+
 		double score = calculateFlowCellScore();
 //		double score2 = calculateFlowCellScoreBak();
 
@@ -304,6 +308,27 @@ public class FlowCell {
 			}
 		}
 		return nonEmptyLanes;
+	}
+
+	public int NumSamples() {
+		int lanes = 0;
+		for(Lane iLane : lanes_){
+			lanes+=iLane.numSamples();
+		}
+		return lanes;
+	}
+
+	public double getFreeSpace() {
+		double totFree=0.0d;
+		double totSpace = 0.0d;
+		for(Lane iLane : lanes_){
+			if(!iLane.isEmpty()){
+				totFree+=iLane.remainingCapacity();
+				totSpace+=iLane.Capacity();
+			}
+		}
+		
+		return (totFree/totSpace) * 100.d;
 	}
 
 }

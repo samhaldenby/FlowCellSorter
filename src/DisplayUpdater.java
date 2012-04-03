@@ -14,7 +14,11 @@ public class DisplayUpdater implements Runnable{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			d.repaint();
+//			System.out.printf("DisplayUpdater: Loop on EDT? %s\n",javax.swing.SwingUtilities.isEventDispatchThread());
+			if(Scores.best!=null){
+				d.repaint();
+				d.update();
+			}
 		}
 		
 	}

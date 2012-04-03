@@ -12,93 +12,50 @@ public class RandomShuffler {
 	private static double FULL_THRESHOLD = INIT_THRESHOLD;
 
 	public static boolean Shuffle(FlowCell fc) throws IOException {
-		// 1) Check if flowcell is too full
-//		if (fc.currentFillLevel() > fc.Capacity()) {
-//			System.out.printf(
-//					"Shuffle failed: Flowcell too full (%.2f/%.2f)\n", fc
-//							.currentFillLevel(), fc.Capacity());
-//			return false;
-//		}
-
-		// 2) Calculate under/over-filled lanes
-		// ArrayList<Lane> overFilled = fc.overFilled();
-		// ArrayList<Lane> underFilled = fc.underFilled();
 
 		int attempts = 0;
-		while (++attempts < fc.getLanes().size()) {
-			randomSwap(fc);
+//		while (++attempts < fc.getLanes().size()) {
+//			randomSwap(fc);
+//
+//		}
 
-		}
-
-		// System.out.println("PostShuffling *****");
-		// fc.printFlowCell();
-		// while(overFilled.size()>0){
-		// System.out.printf("Working: Attempt: %d\n",attempts);
-		// if(attempts++>100){
-		// Scores.shuffleFail+=1;
-		// return false;
-		// }
-		//			
-		// if(Math.random() < 0.5){
-		// if(!randomSwap(fc)){
-		// randomDonate(fc);
-		// }
-		// }
-		// else{
-		// randomDonate(fc);
-		// }
-		//			
-		// overFilled = fc.overFilled();
-		// underFilled = fc.underFilled();
-
-		// }
-
-		// System.out.println("**** Before Polish ");
-		// fc.printFlowCell();
 
 		double rawScore, p1Score, p2Score, s1Score, s2Score, s3Score;
 
 		rawScore = fc.calculateFlowCellScore();
-		// System.out.printf("Raw       : %.2f\n", rawScore);
-		// fc.printFlowCell();
 
 		double prevScore = rawScore;
 		Polish(fc);
-		// fc.printFlowCell();
-		// Polish2(fc);
-		// Polish2(fc);
-		// Polish2(fc);
-		// Polish2(fc);
-		// Polish2(fc);
+
 
 		int polishIter = 0;
 		double currScore = fc.calculateFlowCellScore();
-		while (currScore > prevScore) {
-			System.out.printf("P1: Going again as prevScore: %.2f > %.2f\n",
-					currScore, prevScore);
-			// add to score
-			while (polishIter >= Scores.p.size()) {
-				Scores.p.add(new Double(0.0f));
-			}
-
-			Scores.p.set(polishIter, Scores.p.get(polishIter)
-					+ (currScore - prevScore));
-
-			prevScore = currScore;
-//			Polish2(fc);
-			// if best, set it
-			if (Scores.best == null
-					|| (fc.calculateFlowCellScore() > Scores.best
-							.calculateFlowCellScore() && fc.NumNonEmptyLanes() <= Scores.best
-							.NumNonEmptyLanes())) {
-				Scores.best = fc;
-
-				Scores.best.printFlowCell();
-			}
-			currScore = fc.calculateFlowCellScore();
-			// fc.printFlowCell();
-			++polishIter;
-		}
+//		while (currScore > prevScore) {
+//			System.out.printf("P1: Going again as prevScore: %.2f > %.2f\n",
+//					currScore, prevScore);
+//			// add to score
+//			while (polishIter >= Scores.p.size()) {
+//				Scores.p.add(new Double(0.0f));
+//			}
+//
+//			Scores.p.set(polishIter, Scores.p.get(polishIter)
+//					+ (currScore - prevScore));
+//
+//			prevScore = currScore;
+////			Polish2(fc);
+//			// if best, set it
+//			if (Scores.best == null
+//					|| (fc.calculateFlowCellScore() > Scores.best
+//							.calculateFlowCellScore() && fc.NumNonEmptyLanes() <= Scores.best
+//							.NumNonEmptyLanes())) {
+//				Scores.best = fc;
+//
+//				Scores.best.printFlowCell();
+//			}
+//			currScore = fc.calculateFlowCellScore();
+//			// fc.printFlowCell();
+//			++polishIter;
+//		}
 
 		prevScore = currScore;
 		PolishSwap(fc);
@@ -136,71 +93,75 @@ public class RandomShuffler {
 		}
 
 		prevScore = currScore;
-		Polish(fc);
+//		Polish(fc);
 		// fc.printFlowCell();
-		polishIter = 0;
-		currScore = fc.calculateFlowCellScore();
-		while (currScore > prevScore) {
-			// System.out.printf("P1: Going again as prevScore: %.2f > %.2f\n",currScore,prevScore);
-			// add to score
-			while (polishIter >= Scores.p2.size()) {
-				Scores.p2.add(new Double(0.0f));
-			}
+//		polishIter = 0;
+//		currScore = fc.calculateFlowCellScore();
+//		while (currScore > prevScore) {
+//			// System.out.printf("P1: Going again as prevScore: %.2f > %.2f\n",currScore,prevScore);
+//			// add to score
+//			while (polishIter >= Scores.p2.size()) {
+//				Scores.p2.add(new Double(0.0f));
+//			}
+//
+//			Scores.p2.set(polishIter, Scores.p2.get(polishIter)
+//					+ (currScore - prevScore));
+//
+//			prevScore = currScore;
+////			Polish2(fc);
+//			// if best, set it
+//			if (Scores.best == null
+//					|| (fc.calculateFlowCellScore() > Scores.best
+//							.calculateFlowCellScore() && fc.NumNonEmptyLanes() <= Scores.best
+//							.NumNonEmptyLanes())) {
+//				Scores.best = fc;
+//				Scores.best.printFlowCell();
+//			}
+//			currScore = fc.calculateFlowCellScore();
+//			// fc.printFlowCell();
+//			++polishIter;
+//		}
 
-			Scores.p2.set(polishIter, Scores.p2.get(polishIter)
-					+ (currScore - prevScore));
-
-			prevScore = currScore;
-//			Polish2(fc);
-			// if best, set it
-			if (Scores.best == null
-					|| (fc.calculateFlowCellScore() > Scores.best
-							.calculateFlowCellScore() && fc.NumNonEmptyLanes() <= Scores.best
-							.NumNonEmptyLanes())) {
-				Scores.best = fc;
-				Scores.best.printFlowCell();
-			}
-			currScore = fc.calculateFlowCellScore();
-			// fc.printFlowCell();
-			++polishIter;
-		}
-
-		prevScore = currScore;
-		PolishSwap(fc);
-		// fc.printFlowCell();
-		swapIter = 0;
-		currScore = fc.calculateFlowCellScore();
-		while (currScore > prevScore) {
-			// System.out.printf("S2: Going again as prevScore: %.2f > %.2f (normalised:\t%.2f)\n",currScore,prevScore,
-			// currScore/(double)(fc.NumLanes()));;
-			// add to score
-			while (swapIter >= Scores.s2.size()) {
-				Scores.s2.add(new Double(0.0f));
-			}
-
-			Scores.s2.set(swapIter, Scores.s2.get(swapIter)
-					+ (currScore - prevScore));
-
-			prevScore = currScore;
-			PolishSwap(fc);
-			// if best, set it
-			if (Scores.best == null
-					|| (fc.calculateFlowCellScore() > Scores.best
-							.calculateFlowCellScore() && fc.NumNonEmptyLanes() <= Scores.best
-							.NumNonEmptyLanes())) {
-				Scores.best = fc;
-				Scores.best.printFlowCell();
-			}
-
-			// fc.printFlowCell();
-			currScore = fc.calculateFlowCellScore();
-			++swapIter;
-		}
+//		prevScore = currScore;
+//		PolishSwap(fc);
+//		// fc.printFlowCell();
+//		swapIter = 0;
+//		currScore = fc.calculateFlowCellScore();
+//		while (currScore > prevScore) {
+//			// System.out.printf("S2: Going again as prevScore: %.2f > %.2f (normalised:\t%.2f)\n",currScore,prevScore,
+//			// currScore/(double)(fc.NumLanes()));;
+//			// add to score
+//			while (swapIter >= Scores.s2.size()) {
+//				Scores.s2.add(new Double(0.0f));
+//			}
+//
+//			Scores.s2.set(swapIter, Scores.s2.get(swapIter)
+//					+ (currScore - prevScore));
+//
+//			prevScore = currScore;
+////			Polish(fc);
+//			PolishSwap(fc);
+//			// if best, set it
+//			if (Scores.best == null
+//					|| (fc.calculateFlowCellScore() > Scores.best
+//							.calculateFlowCellScore() && fc.NumNonEmptyLanes() <= Scores.best
+//							.NumNonEmptyLanes())) {
+//				Scores.best = fc;
+//				Scores.best.printFlowCell();
+//			}
+//
+//			// fc.printFlowCell();
+//			currScore = fc.calculateFlowCellScore();
+//			++swapIter;
+//		}
 
 		Scores.counts++;
 		Scores.report();
 
 		System.out.println("SUCCESS!");
+		
+		//sort best
+		Collections.sort(Scores.best.getLanes(), new LaneFullnessComparator());
 		return true;
 	}
 
@@ -208,6 +169,8 @@ public class RandomShuffler {
 
 	public static boolean Polish(FlowCell fc) throws IOException {
 
+//		System.out.printf("Loop on EDT? %s\n",javax.swing.SwingUtilities.isEventDispatchThread());
+//		System.in.read();
 		// sort lanes from most full to least full
 		ArrayList<Lane> sortedLanes = fc.NonEmptyLanes();
 		Collections.sort(sortedLanes, new LaneFullnessComparator());
@@ -220,10 +183,8 @@ public class RandomShuffler {
 		while (!donePolishing && iFuller.hasPrevious()) {
 			
 			//update best flowcell if required
-			if (Scores.best == null	|| (fc.calculateFlowCellScore() > Scores.best.calculateFlowCellScore())) {
-				Scores.best = fc;
-				Scores.best.printFlowCell();
-			}
+			Scores.updateBest(fc);
+
 			Lane fullest = iFuller.previous();
 			
 			if(fullest.isEmpty()){
@@ -235,81 +196,86 @@ public class RandomShuffler {
 
 			while (iEmptier.hasNext()/* && !searchForGapComplete */) {
 				Lane emptiest = iEmptier.next();
-			
-				// check each sample in lane to see if any will fit in gap in
-				// fullest lane
+				Scores.updateBest(fc);
+				if(fullest.LaneNumber()!=emptiest.LaneNumber()){
 				
-				//first, try shifting pools rather than individual samples
-				boolean moreBundlesToProcess = true;
-				while(moreBundlesToProcess){
-					moreBundlesToProcess=false;
-					emptiest.calculatePools();
-					for(SampleBundle iPool : emptiest.Pools().values()){
-						if (iPool.Size() <= fullest.remainingCapacity() && 
-							fullest.getSharedBarcodes(iPool.Samples()).size()==0 &&
-							fullest.currentFillLevel() + iPool.Size() > emptiest.currentFillLevel()) {
-//							System.out.printf("POOL MOVING: %d[%.2f]->%d[%.2f (%.2f)]\n",emptiest.LaneNumber(), iPool.Size(), fullest.LaneNumber(), fullest.currentFillLevel(), fullest.remainingCapacity());
-//							System.in.read();
-							if(fullest.LaneNumber()!=emptiest.LaneNumber()){//TODO: This is in a ridiculous place. Put it BEFORE doing the more heavy calculations
-								fullest.addBundle(iPool);
-								fullest.calculatePools(); //best to recalculate as soon as something changes
-								
-								for(Sample iSampleToRemove : iPool.Samples()){	//TODO: This could be better with a removePool(int) method
-									emptiest.removeSample(iSampleToRemove);
+					// check each sample in lane to see if any will fit in gap in
+					// fullest lane
+					
+					//first, try shifting pools rather than individual samples
+					boolean moreBundlesToProcess = true;
+					while(moreBundlesToProcess){
+						moreBundlesToProcess=false;
+						emptiest.calculatePools();
+						for(SampleBundle iPool : emptiest.Pools().values()){
+							if (iPool.Size() <= fullest.remainingCapacity() && 
+								fullest.getSharedBarcodes(iPool.Samples()).size()==0 &&
+								fullest.currentFillLevel() + iPool.Size() > emptiest.currentFillLevel()) {
+	//							System.out.printf("POOL MOVING: %d[%.2f]->%d[%.2f (%.2f)]\n",emptiest.LaneNumber(), iPool.Size(), fullest.LaneNumber(), fullest.currentFillLevel(), fullest.remainingCapacity());
+	//							System.in.read();
+								if(fullest.LaneNumber()!=emptiest.LaneNumber()){//TODO: This is in a ridiculous place. Put it BEFORE doing the more heavy calculations
+									fullest.addBundle(iPool);
+									fullest.calculatePools(); //best to recalculate as soon as something changes
+									
+									for(Sample iSampleToRemove : iPool.Samples()){	//TODO: This could be better with a removePool(int) method
+										emptiest.removeSample(iSampleToRemove);
+									}
+									emptiest.calculatePools();
+									moreBundlesToProcess=true;
 								}
-								emptiest.calculatePools();
-								moreBundlesToProcess=true;
 							}
-						}
-					}		
-				}
+						}		
+					}
 				
 					
-				
-				Iterator<Sample> iSample = emptiest.getSamples().iterator();
-				// ArrayList<Sample> samplesToRemove = new ArrayList<Sample>();
-				// //store samples for erasing
-				while (iSample.hasNext()) {
-					Sample sample = iSample.next();
-					if (sample.Reads() <= fullest.remainingCapacity() && 
-						!sample.isPooled() &&
-						!fullest.hasBarcode(sample.Barcode()) &&
-						fullest.currentFillLevel() + sample.Reads() > emptiest.currentFillLevel()) {
-							
-							
-							
-						// donePolishing=true; //just one iteration for
-						// debugging purposes
-
-						// final check that we're not comparing lane with itself
-						if (fullest.LaneNumber() != emptiest.LaneNumber()) {	//TODO: This is in a ridiculous place. Put it BEFORE doing the more heavy calculations
-							// System.out.printf("Found slot [%d : %.2f]-> [%d : %.2f]\n",emptiest.LaneNumber(),
-							// sample.Reads(), fullest.LaneNumber(),
-							// fullest.remainingCapacity());
-//							searchForGapComplete = true;
-							fullest.addSample(sample);
-							iSample.remove();
-							
-							if (Scores.best == null
-									|| (fc.calculateFlowCellScore() > Scores.best.calculateFlowCellScore())) {
-								Scores.best = fc;
-								Scores.best.printFlowCell();
+					//Now do individual samples
+					Iterator<Sample> iSample = emptiest.getSamples().iterator();
+					// ArrayList<Sample> samplesToRemove = new ArrayList<Sample>();
+					// //store samples for erasing
+					while (iSample.hasNext()) {
+						Scores.updateBest(fc);
+						Sample sample = iSample.next();
+						if (sample.Reads() <= fullest.remainingCapacity() && 
+							!sample.isPooled() &&
+							!fullest.hasBarcode(sample.Barcode()) &&
+							fullest.currentFillLevel() + sample.Reads() > emptiest.currentFillLevel()) {
+								
+								
+								
+							// donePolishing=true; //just one iteration for
+							// debugging purposes
+	
+							// final check that we're not comparing lane with itself
+							if (fullest.LaneNumber() != emptiest.LaneNumber()) {	//TODO: This is in a ridiculous place. Put it BEFORE doing the more heavy calculations
+								// System.out.printf("Found slot [%d : %.2f]-> [%d : %.2f]\n",emptiest.LaneNumber(),
+								// sample.Reads(), fullest.LaneNumber(),
+								// fullest.remainingCapacity());
+	//							searchForGapComplete = true;
+								fullest.addSample(sample);
+								iSample.remove();
+								
+								if (Scores.best == null
+										|| (fc.calculateFlowCellScore() > Scores.best.calculateFlowCellScore())) {
+									Scores.best = fc;
+									Scores.best.printFlowCell();
+									Scores.updateBest(fc);
+								}
+								// fc.printFlowCell();
+								// samplesToRemove.add(sample);
+							} else {
+								// System.out.printf("SAME  slot [%d : %.2f]-> [%d : %.2f]\n",emptiest.LaneNumber(),
+								// sample.Reads(), fullest.LaneNumber(),
+								// fullest.remainingCapacity());
 							}
-							// fc.printFlowCell();
-							// samplesToRemove.add(sample);
-						} else {
-							// System.out.printf("SAME  slot [%d : %.2f]-> [%d : %.2f]\n",emptiest.LaneNumber(),
-							// sample.Reads(), fullest.LaneNumber(),
-							// fullest.remainingCapacity());
+	
 						}
-
+	
+						// Iterator<Sample> remSam = samplesToRemove.iterator();
+						// while(remSam.hasNext()){
+						// emptiest.removeSample(remSam.next());
+						// }
+	
 					}
-
-					// Iterator<Sample> remSam = samplesToRemove.iterator();
-					// while(remSam.hasNext()){
-					// emptiest.removeSample(remSam.next());
-					// }
-
 				}
 
 			}
@@ -531,6 +497,7 @@ public class RandomShuffler {
 				|| (fc.calculateFlowCellScore() > Scores.best.calculateFlowCellScore())) {
 			Scores.best = fc;
 			Scores.best.printFlowCell();
+			Scores.updateBest(fc);
 		}
 		return true;
 	}
