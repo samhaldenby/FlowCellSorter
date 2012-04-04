@@ -3,6 +3,7 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 
 import javax.swing.JButton;
@@ -12,7 +13,10 @@ import javax.swing.JTextField;
 
 
 public class ControlPanel extends JPanel{
+	private Display display_;
+	
 	private JButton loadButton;
+	private JButton runButton;
 	private JButton saveButton;
 	
 	//stats panel
@@ -23,7 +27,9 @@ public class ControlPanel extends JPanel{
 	private JLabel laneLabel;
 	private JLabel sampleLabel;
 	private JLabel freeLabel;
-	public ControlPanel(){
+	public ControlPanel(Display display){
+		
+		display_ = display;
 		//set layout
 		this.setLayout(new GridLayout(8,1));
 		
@@ -40,6 +46,19 @@ public class ControlPanel extends JPanel{
             {
                 //Execute when button is pressed
                 System.out.println("You clicked the load button");
+                File input = FileChooser.Choose("Open","Select samplesheet to open");
+                try {
+					Storage.samples = SheetReader.read(input.toString());
+					
+					//reset variable
+					numLanesText.setText("NA");
+					numSamplesText.setText(Integer.toString(Storage.samples.size()));
+					freeSpaceText.setText("NA");
+					Scores.best = null;
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 
             }
         }); 
@@ -52,11 +71,35 @@ public class ControlPanel extends JPanel{
             {
                 //Execute when button is pressed
                 System.out.println("You clicked the save button");
+                
+                File output = FileChooser.Choose("Save","Select output file");
+                try {
+					StrategyWriter.write(output.toString());
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
           
             }
         }); 
 		
+		
+		//create run button
+		runButton = new JButton("Run");
+		runButton.addActionListener(new ActionListener() {
+			
+			public void actionPerformed(ActionEvent e)
+			{
+				//Execute when button is pressed
+				System.out.println("You clicked the run button");
+				ShuffleRunner runner = new ShuffleRunner(display_);
+				new Thread(runner).start();
+
+			}
+		});
+		
 		add(loadButton);
+		add(runButton);
 		add(saveButton);
 		add(statsPanel);
 	}
@@ -96,6 +139,7 @@ public class ControlPanel extends JPanel{
 	public void disableLoadSave() {
 		loadButton.setEnabled(false);
 		saveButton.setEnabled(false);
+		runButton.setEnabled(false);
 		
 	}
 
@@ -103,6 +147,7 @@ public class ControlPanel extends JPanel{
 	public void enableLoadSave() {
 		loadButton.setEnabled(true);
 		saveButton.setEnabled(true);
+		runButton.setEnabled(true);
 		
 	}
 	

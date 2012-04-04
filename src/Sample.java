@@ -5,6 +5,7 @@ public class Sample {
 	private String barcode_;
 	private double numReads_;
 	private int pool_;
+	private boolean barcoded_;
 	
 	public Sample(String name, String barcode, double numReads, int pool){
 		name_ = name;
@@ -30,7 +31,15 @@ public class Sample {
 		return pool_;
 	}
 	
+	public boolean isBarcoded(){
+		return barcoded_;
+	}
+	
 	public boolean isPooled(){
 		return (pool_!=Consts.NO_POOL);
+	}
+
+	public void setBarcoded(boolean barcoded) {
+		barcoded_=barcoded;
 	}
 }

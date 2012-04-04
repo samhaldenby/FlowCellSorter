@@ -26,6 +26,7 @@ public class SheetReader {
 		
 		String line;
 		
+		int tempBarcodeNumber = 1;
 		while((line = br.readLine()) != null){
 			System.out.println(line);
 			String[] tokens = line.split("\t");
@@ -33,6 +34,12 @@ public class SheetReader {
 				//check if it's already in map
 				String name = tokens[0];
 				String barcode = tokens[1];
+				//give a temporary unique barcode if not barcoded
+				boolean barcoded = barcode.length()>0;
+				if(!barcoded){
+					barcode = "NoBC"+Integer.toString(tempBarcodeNumber);
+					tempBarcodeNumber++;
+				}
 				double reads = Double.parseDouble(tokens[2]);
 				int pool = Consts.NO_POOL;
 				if(tokens.length>3){
@@ -45,7 +52,9 @@ public class SheetReader {
 				}else{
 					sampleNameMap.put(name,0);
 				}
-				samples.add(new Sample(name,barcode,reads, pool));
+				Sample sample = new Sample(name,barcode,reads,pool);
+				sample.setBarcoded(barcoded);
+				samples.add(sample);
 			}
 		}
 		System.out.printf("There are %d samples loaded!\n", samples.size());

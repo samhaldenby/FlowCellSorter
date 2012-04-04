@@ -30,7 +30,7 @@ public class Display extends JFrame{
 		setLayout(new BorderLayout());
 		
 		//create panels
-		controlPanel = new ControlPanel();
+		controlPanel = new ControlPanel(this);
 		
 		
 		flowCellPanel = new FlowCellPanel();

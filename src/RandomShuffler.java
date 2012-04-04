@@ -14,10 +14,10 @@ public class RandomShuffler {
 	public static boolean Shuffle(FlowCell fc) throws IOException {
 
 		int attempts = 0;
-//		while (++attempts < fc.getLanes().size()) {
-//			randomSwap(fc);
-//
-//		}
+		while (++attempts < fc.getLanes().size()) {
+			randomSwap(fc);
+
+		}
 
 
 		double rawScore, p1Score, p2Score, s1Score, s2Score, s3Score;
@@ -30,32 +30,32 @@ public class RandomShuffler {
 
 		int polishIter = 0;
 		double currScore = fc.calculateFlowCellScore();
-//		while (currScore > prevScore) {
-//			System.out.printf("P1: Going again as prevScore: %.2f > %.2f\n",
-//					currScore, prevScore);
-//			// add to score
-//			while (polishIter >= Scores.p.size()) {
-//				Scores.p.add(new Double(0.0f));
-//			}
-//
-//			Scores.p.set(polishIter, Scores.p.get(polishIter)
-//					+ (currScore - prevScore));
-//
-//			prevScore = currScore;
-////			Polish2(fc);
-//			// if best, set it
-//			if (Scores.best == null
-//					|| (fc.calculateFlowCellScore() > Scores.best
-//							.calculateFlowCellScore() && fc.NumNonEmptyLanes() <= Scores.best
-//							.NumNonEmptyLanes())) {
-//				Scores.best = fc;
-//
-//				Scores.best.printFlowCell();
-//			}
-//			currScore = fc.calculateFlowCellScore();
-//			// fc.printFlowCell();
-//			++polishIter;
-//		}
+		while (currScore > prevScore) {
+			System.out.printf("P1: Going again as prevScore: %.2f > %.2f\n",
+					currScore, prevScore);
+			// add to score
+			while (polishIter >= Scores.p.size()) {
+				Scores.p.add(new Double(0.0f));
+			}
+
+			Scores.p.set(polishIter, Scores.p.get(polishIter)
+					+ (currScore - prevScore));
+
+			prevScore = currScore;
+//			Polish2(fc);
+			// if best, set it
+			if (Scores.best == null
+					|| (fc.calculateFlowCellScore() > Scores.best
+							.calculateFlowCellScore() && fc.NumNonEmptyLanes() <= Scores.best
+							.NumNonEmptyLanes())) {
+				Scores.best = fc;
+
+				Scores.best.printFlowCell();
+			}
+			currScore = fc.calculateFlowCellScore();
+			// fc.printFlowCell();
+			++polishIter;
+		}
 
 		prevScore = currScore;
 		PolishSwap(fc);
@@ -93,67 +93,67 @@ public class RandomShuffler {
 		}
 
 		prevScore = currScore;
-//		Polish(fc);
-		// fc.printFlowCell();
-//		polishIter = 0;
-//		currScore = fc.calculateFlowCellScore();
-//		while (currScore > prevScore) {
-//			// System.out.printf("P1: Going again as prevScore: %.2f > %.2f\n",currScore,prevScore);
-//			// add to score
-//			while (polishIter >= Scores.p2.size()) {
-//				Scores.p2.add(new Double(0.0f));
-//			}
-//
-//			Scores.p2.set(polishIter, Scores.p2.get(polishIter)
-//					+ (currScore - prevScore));
-//
-//			prevScore = currScore;
-////			Polish2(fc);
-//			// if best, set it
-//			if (Scores.best == null
-//					|| (fc.calculateFlowCellScore() > Scores.best
-//							.calculateFlowCellScore() && fc.NumNonEmptyLanes() <= Scores.best
-//							.NumNonEmptyLanes())) {
-//				Scores.best = fc;
-//				Scores.best.printFlowCell();
-//			}
-//			currScore = fc.calculateFlowCellScore();
-//			// fc.printFlowCell();
-//			++polishIter;
-//		}
+		Polish(fc);
+		 fc.printFlowCell();
+		polishIter = 0;
+		currScore = fc.calculateFlowCellScore();
+		while (currScore > prevScore) {
+			// System.out.printf("P1: Going again as prevScore: %.2f > %.2f\n",currScore,prevScore);
+			// add to score
+			while (polishIter >= Scores.p2.size()) {
+				Scores.p2.add(new Double(0.0f));
+			}
 
-//		prevScore = currScore;
-//		PolishSwap(fc);
-//		// fc.printFlowCell();
-//		swapIter = 0;
-//		currScore = fc.calculateFlowCellScore();
-//		while (currScore > prevScore) {
-//			// System.out.printf("S2: Going again as prevScore: %.2f > %.2f (normalised:\t%.2f)\n",currScore,prevScore,
-//			// currScore/(double)(fc.NumLanes()));;
-//			// add to score
-//			while (swapIter >= Scores.s2.size()) {
-//				Scores.s2.add(new Double(0.0f));
-//			}
-//
-//			Scores.s2.set(swapIter, Scores.s2.get(swapIter)
-//					+ (currScore - prevScore));
-//
-//			prevScore = currScore;
-////			Polish(fc);
-//			PolishSwap(fc);
-//			// if best, set it
-//			if (Scores.best == null
-//					|| (fc.calculateFlowCellScore() > Scores.best
-//							.calculateFlowCellScore() && fc.NumNonEmptyLanes() <= Scores.best
-//							.NumNonEmptyLanes())) {
-//				Scores.best = fc;
-//				Scores.best.printFlowCell();
-//			}
-//
-//			// fc.printFlowCell();
-//			currScore = fc.calculateFlowCellScore();
-//			++swapIter;
-//		}
+			Scores.p2.set(polishIter, Scores.p2.get(polishIter)
+					+ (currScore - prevScore));
+
+			prevScore = currScore;
+//			Polish2(fc);
+			// if best, set it
+			if (Scores.best == null
+					|| (fc.calculateFlowCellScore() > Scores.best
+							.calculateFlowCellScore() && fc.NumNonEmptyLanes() <= Scores.best
+							.NumNonEmptyLanes())) {
+				Scores.best = fc;
+				Scores.best.printFlowCell();
+			}
+			currScore = fc.calculateFlowCellScore();
+			// fc.printFlowCell();
+			++polishIter;
+		}
+
+		prevScore = currScore;
+		PolishSwap(fc);
+		// fc.printFlowCell();
+		swapIter = 0;
+		currScore = fc.calculateFlowCellScore();
+		while (currScore > prevScore) {
+			// System.out.printf("S2: Going again as prevScore: %.2f > %.2f (normalised:\t%.2f)\n",currScore,prevScore,
+			// currScore/(double)(fc.NumLanes()));;
+			// add to score
+			while (swapIter >= Scores.s2.size()) {
+				Scores.s2.add(new Double(0.0f));
+			}
+
+			Scores.s2.set(swapIter, Scores.s2.get(swapIter)
+					+ (currScore - prevScore));
+
+			prevScore = currScore;
+//			Polish(fc);
+			PolishSwap(fc);
+			// if best, set it
+			if (Scores.best == null
+					|| (fc.calculateFlowCellScore() > Scores.best
+							.calculateFlowCellScore() && fc.NumNonEmptyLanes() <= Scores.best
+							.NumNonEmptyLanes())) {
+				Scores.best = fc;
+				Scores.best.printFlowCell();
+			}
+
+			// fc.printFlowCell();
+			currScore = fc.calculateFlowCellScore();
+			++swapIter;
+		}
 
 		Scores.counts++;
 		Scores.report();
