@@ -1,5 +1,4 @@
 import java.awt.Color;
-import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -13,6 +12,11 @@ import javax.swing.JTextField;
 
 
 public class ControlPanel extends JPanel{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8523461652875295421L;
+
 	private Display display_;
 	
 	private JButton loadButton;
@@ -34,7 +38,7 @@ public class ControlPanel extends JPanel{
 		this.setLayout(new GridLayout(8,1));
 		
 		//set background colour
-		setBackground(Color.gray.brighter());
+		setBackground(Color.magenta.darker());
 		
 		//create stats panel
 		createStatsPanel();
@@ -47,18 +51,21 @@ public class ControlPanel extends JPanel{
                 //Execute when button is pressed
                 System.out.println("You clicked the load button");
                 File input = FileChooser.Choose("Open","Select samplesheet to open");
-                try {
-					Storage.samples = SheetReader.read(input.toString());
-					
-					//reset variable
-					numLanesText.setText("NA");
-					numSamplesText.setText(Integer.toString(Storage.samples.size()));
-					freeSpaceText.setText("NA");
-					Scores.best = null;
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+                if(input!=null){
+                	 try {
+     					Storage.samples = SheetReader.read(input.toString());
+     					
+     					//reset variable
+     					numLanesText.setText("NA");
+     					numSamplesText.setText(Integer.toString(Storage.samples.size()));
+     					freeSpaceText.setText("NA");
+     					Scores.best = null;
+     				} catch (IOException e1) {
+     					// TODO Auto-generated catch block
+     					e1.printStackTrace();
+     				}
+                }
+               
 
             }
         }); 
@@ -73,12 +80,14 @@ public class ControlPanel extends JPanel{
                 System.out.println("You clicked the save button");
                 
                 File output = FileChooser.Choose("Save","Select output file");
-                try {
-					StrategyWriter.write(output.toString());
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+                if (output!=null){
+	                try {
+						StrategyWriter.write(output.toString());
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+                }
           
             }
         }); 
@@ -140,7 +149,6 @@ public class ControlPanel extends JPanel{
 		loadButton.setEnabled(false);
 		saveButton.setEnabled(false);
 		runButton.setEnabled(false);
-		
 	}
 
 
@@ -148,7 +156,6 @@ public class ControlPanel extends JPanel{
 		loadButton.setEnabled(true);
 		saveButton.setEnabled(true);
 		runButton.setEnabled(true);
-		
 	}
 	
 	

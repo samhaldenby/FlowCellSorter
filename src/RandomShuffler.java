@@ -1,17 +1,15 @@
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.ListIterator;
-import java.util.Map;
 
 public class RandomShuffler {
 
 	private static double INIT_THRESHOLD = 0.99;
 	private static double FULL_THRESHOLD = INIT_THRESHOLD;
 
-	public static boolean Shuffle(FlowCell fc) throws IOException {
+	public static boolean Shuffle(FlowCell fc, Display display) throws IOException {
 
 		int attempts = 0;
 		while (++attempts < fc.getLanes().size()) {
@@ -23,21 +21,17 @@ public class RandomShuffler {
 		double rawScore = fc.calculateFlowCellScore();
 		double prevScore = rawScore;
 		
-		
+		display.updateMessage("Stacking");
 		Polish(fc);
 
 		int polishIter = 0;
+		
 		double currScore = fc.calculateFlowCellScore();
 		while (currScore > prevScore) {
 			System.out.printf("P1: Going again as prevScore: %.2f > %.2f\n",
 					currScore, prevScore);
 			// add to score
-			while (polishIter >= Scores.p.size()) {
-				Scores.p.add(new Double(0.0f));
-			}
-
-			Scores.p.set(polishIter, Scores.p.get(polishIter)
-					+ (currScore - prevScore));
+			
 
 			prevScore = currScore;
 //			Polish2(fc);
@@ -56,6 +50,7 @@ public class RandomShuffler {
 		}
 
 		prevScore = currScore;
+		display.updateMessage("Swapping");
 		PolishSwap(fc);
 		// fc.printFlowCell();
 		// PolishSwap(fc);
@@ -68,12 +63,7 @@ public class RandomShuffler {
 		while (currScore > prevScore) {
 			// add to score
 			// System.out.printf("S1: Going again as prevScore: %.2f > %.2f\n",currScore,prevScore);
-			while (swapIter >= Scores.s.size()) {
-				Scores.s.add(new Double(0.0f));
-			}
-
-			Scores.s.set(swapIter, Scores.s.get(swapIter)
-					+ (currScore - prevScore));
+			
 
 			prevScore = currScore;
 			PolishSwap(fc);
@@ -91,6 +81,7 @@ public class RandomShuffler {
 		}
 
 		prevScore = currScore;
+		display.updateMessage("Polishing");
 		Polish(fc);
 		 fc.printFlowCell();
 		polishIter = 0;
@@ -98,12 +89,7 @@ public class RandomShuffler {
 		while (currScore > prevScore) {
 			// System.out.printf("P1: Going again as prevScore: %.2f > %.2f\n",currScore,prevScore);
 			// add to score
-			while (polishIter >= Scores.p2.size()) {
-				Scores.p2.add(new Double(0.0f));
-			}
-
-			Scores.p2.set(polishIter, Scores.p2.get(polishIter)
-					+ (currScore - prevScore));
+			
 
 			prevScore = currScore;
 //			Polish2(fc);
@@ -121,6 +107,7 @@ public class RandomShuffler {
 		}
 
 		prevScore = currScore;
+		display.updateMessage("Finishing");
 		PolishSwap(fc);
 		// fc.printFlowCell();
 		swapIter = 0;
@@ -129,13 +116,7 @@ public class RandomShuffler {
 			// System.out.printf("S2: Going again as prevScore: %.2f > %.2f (normalised:\t%.2f)\n",currScore,prevScore,
 			// currScore/(double)(fc.NumLanes()));;
 			// add to score
-			while (swapIter >= Scores.s2.size()) {
-				Scores.s2.add(new Double(0.0f));
-			}
-
-			Scores.s2.set(swapIter, Scores.s2.get(swapIter)
-					+ (currScore - prevScore));
-
+			
 			prevScore = currScore;
 //			Polish(fc);
 			PolishSwap(fc);
@@ -154,12 +135,13 @@ public class RandomShuffler {
 		}
 
 		Scores.counts++;
-		Scores.report();
+
 
 		System.out.println("SUCCESS!");
 		
 		//sort best
 		Collections.sort(Scores.best.getLanes(), new LaneFullnessComparator());
+		display.updateMessage("Done");
 		return true;
 	}
 

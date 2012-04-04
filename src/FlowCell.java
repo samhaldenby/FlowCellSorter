@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -11,15 +12,14 @@ public class FlowCell {
 	private double capacity_;
 	private double capacityPerLane_;
 	private double maxScore_;
-	private Display display_;
 
-	public FlowCell(double capacityPerLane, Display display) {
+	public FlowCell(double capacityPerLane) {
 		// announce
 		// System.out.printf("Creating FlowCell (lanes=%d, capacityPerLane=%.2f)\n",numLanes,
 		// capacityPerLane);
 //		numLanes_ = numLanes;
 		capacityPerLane_ = capacityPerLane;
-		display_ = display;
+
 //		capacity_ = numLanes_ * capacityPerLane;
 
 //		// create lanes
@@ -28,7 +28,7 @@ public class FlowCell {
 //		}
 	}
 
-	public boolean initialAddSamples(ArrayList<Sample> samples) throws IOException {
+	public boolean initialAddSamples(ArrayList<Sample> samples, Display display) throws IOException {
 		//DEBUG
 		
 		//First, create two lots of samples: a map of pooled bundles and a list of unpooled samples
@@ -108,18 +108,31 @@ public class FlowCell {
 		//calculate max score
 		maxScore_ = this.calculateMaxPossibleScore();
 		
+		//Finally validate flow cell
+		boolean overfill = false;
+		HashSet<Integer> overfilledPools = new HashSet<Integer>();
+		for(Lane iLane : this.lanes_){
+			if(iLane.currentFillLevel() > iLane.Capacity()){
+				//grab pool number (this can only happen if pool is over filled)
+				overfilledPools.add(iLane.getSamples().get(0).Pool());
+				overfill = true;
+			}
+		}
+		
+		if(overfill){
+			String errorMessage = "Error: Over-full pools:";
+			for(Integer i : overfilledPools){
+				errorMessage = errorMessage + " [" + Integer.toString(i) + "]";
+			}
+			display.updateMessage(errorMessage);
+			
+//			System.out.printf("Error: Lane %d is overfilled\n", iLane.LaneNumber());
+			return false;
+		}
 //		System.in.read();
 		return true;
 	}
 
-	private void clear() {
-		// clear all lanes
-		Iterator<Lane> iLane = lanes_.iterator();
-		while (iLane.hasNext()) {
-			iLane.next().removeAllSamples();
-		}
-
-	}
 
 	public void addLane() {
 		lanes_.add(new Lane(numLanes_ - 1, capacityPerLane_));

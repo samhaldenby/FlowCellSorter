@@ -3,13 +3,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
-import java.util.Set;
 
 
 public class SampleSheetRandomiser {
 	
-	private static int NUM_SAMPLES =1200;
-	private static int NUM_POOLS = NUM_SAMPLES*20;
+	private static int NUM_SAMPLES =1000;
+	private static int NUM_POOLS = NUM_SAMPLES;
 	private static float CHANCE_OF_POOLING=0.0f;
 	
 	public static ArrayList<Sample> create() throws IOException{
@@ -84,24 +83,9 @@ public class SampleSheetRandomiser {
 			else if(rnd==3) num=0.33f;
 			else if(rnd==4) num=0.1f;
 			else if (rnd==5) num=0.75f;
-			num = r.nextFloat() * 0.2f + 0.1f;
-//			num=1.0f/6.0f;
-//			num=0.199f;
-//			num = (int)(r.nextFloat() * 20) / 20.0f;
-//			while(num<0.05 || num > 0.75){
-//				num = (int)(r.nextFloat() * 20) / 20.0f;
-//			}
-			
+			num = r.nextFloat();	//comment this out if you want more realistic sample requirements			
 	
 			String sampleName = "S" + Integer.toString(s);
-//			if(rnd!=1)
-			Random rand = new Random();
-//			String barcode = Character.toString((char)(rand.nextInt(8)+'A'));
-			
-
-
-		
-			
 			String barcode = barcodes.get((int)(Math.random()*24));
 			
 			//should this be pooled?

@@ -12,20 +12,23 @@ public class ShuffleRunner implements Runnable{
 	public void run() {
 		if(Storage.samples!=null){
 			display_.disableLoadSave();
-			int iter = 0;
 			
-			FlowCell flowCell = new FlowCell(Consts.LANE_CAPACITY, display_);
+			FlowCell flowCell = new FlowCell(Consts.LANE_CAPACITY);
 
 			//add samples
 			try {
-				flowCell.initialAddSamples(Storage.samples);
+				if(!flowCell.initialAddSamples(Storage.samples, display_)){
+					System.out.println("Cancelling shuffle!");
+					display_.enableLoadSave();
+					return;
+				}
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 			
 			try {
-				RandomShuffler.Shuffle(flowCell);
+				RandomShuffler.Shuffle(flowCell, display_);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
