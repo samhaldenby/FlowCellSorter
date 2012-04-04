@@ -42,4 +42,5 @@ public class Sample {
 	public void setBarcoded(boolean barcoded) {
 		barcoded_=barcoded;
 	}
+
 }

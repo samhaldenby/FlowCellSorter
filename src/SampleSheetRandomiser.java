@@ -8,7 +8,7 @@ import java.util.Set;
 
 public class SampleSheetRandomiser {
 	
-	private static int NUM_SAMPLES =150;
+	private static int NUM_SAMPLES =1200;
 	private static int NUM_POOLS = NUM_SAMPLES*20;
 	private static float CHANCE_OF_POOLING=0.0f;
 	
@@ -84,7 +84,7 @@ public class SampleSheetRandomiser {
 			else if(rnd==3) num=0.33f;
 			else if(rnd==4) num=0.1f;
 			else if (rnd==5) num=0.75f;
-			num = r.nextFloat();
+			num = r.nextFloat() * 0.2f + 0.1f;
 //			num=1.0f/6.0f;
 //			num=0.199f;
 //			num = (int)(r.nextFloat() * 20) / 20.0f;

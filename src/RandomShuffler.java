@@ -20,13 +20,11 @@ public class RandomShuffler {
 		}
 
 
-		double rawScore, p1Score, p2Score, s1Score, s2Score, s3Score;
-
-		rawScore = fc.calculateFlowCellScore();
-
+		double rawScore = fc.calculateFlowCellScore();
 		double prevScore = rawScore;
+		
+		
 		Polish(fc);
-
 
 		int polishIter = 0;
 		double currScore = fc.calculateFlowCellScore();
@@ -169,14 +167,12 @@ public class RandomShuffler {
 
 	public static boolean Polish(FlowCell fc) throws IOException {
 
-//		System.out.printf("Loop on EDT? %s\n",javax.swing.SwingUtilities.isEventDispatchThread());
-//		System.in.read();
 		// sort lanes from most full to least full
 		ArrayList<Lane> sortedLanes = fc.NonEmptyLanes();
 		Collections.sort(sortedLanes, new LaneFullnessComparator());
 
 
-		// starting from full to least full, try and squeeze samples into gap on fullestlane
+		// starting from full to least full, try and squeeze samples into gap on fullest lane
 		boolean donePolishing = false;
 
 		ListIterator<Lane> iFuller = sortedLanes.listIterator(sortedLanes.size());
@@ -211,18 +207,17 @@ public class RandomShuffler {
 							if (iPool.Size() <= fullest.remainingCapacity() && 
 								fullest.getSharedBarcodes(iPool.Samples()).size()==0 &&
 								fullest.currentFillLevel() + iPool.Size() > emptiest.currentFillLevel()) {
-	//							System.out.printf("POOL MOVING: %d[%.2f]->%d[%.2f (%.2f)]\n",emptiest.LaneNumber(), iPool.Size(), fullest.LaneNumber(), fullest.currentFillLevel(), fullest.remainingCapacity());
-	//							System.in.read();
-								if(fullest.LaneNumber()!=emptiest.LaneNumber()){//TODO: This is in a ridiculous place. Put it BEFORE doing the more heavy calculations
-									fullest.addBundle(iPool);
-									fullest.calculatePools(); //best to recalculate as soon as something changes
-									
-									for(Sample iSampleToRemove : iPool.Samples()){	//TODO: This could be better with a removePool(int) method
-										emptiest.removeSample(iSampleToRemove);
-									}
-									emptiest.calculatePools();
-									moreBundlesToProcess=true;
+
+								//move
+								fullest.addBundle(iPool);
+								fullest.calculatePools(); //best to recalculate as soon as something changes
+								
+								for(Sample iSampleToRemove : iPool.Samples()){	//TODO: This could be better with a removePool(int) method
+									emptiest.removeSample(iSampleToRemove);
 								}
+								emptiest.calculatePools();
+								moreBundlesToProcess=true;
+								
 							}
 						}		
 					}
@@ -230,8 +225,6 @@ public class RandomShuffler {
 					
 					//Now do individual samples
 					Iterator<Sample> iSample = emptiest.getSamples().iterator();
-					// ArrayList<Sample> samplesToRemove = new ArrayList<Sample>();
-					// //store samples for erasing
 					while (iSample.hasNext()) {
 						Scores.updateBest(fc);
 						Sample sample = iSample.next();
@@ -239,54 +232,25 @@ public class RandomShuffler {
 							!sample.isPooled() &&
 							!fullest.hasBarcode(sample.Barcode()) &&
 							fullest.currentFillLevel() + sample.Reads() > emptiest.currentFillLevel()) {
-								
-								
-								
-							// donePolishing=true; //just one iteration for
-							// debugging purposes
-	
-							// final check that we're not comparing lane with itself
-							if (fullest.LaneNumber() != emptiest.LaneNumber()) {	//TODO: This is in a ridiculous place. Put it BEFORE doing the more heavy calculations
-								// System.out.printf("Found slot [%d : %.2f]-> [%d : %.2f]\n",emptiest.LaneNumber(),
-								// sample.Reads(), fullest.LaneNumber(),
-								// fullest.remainingCapacity());
-	//							searchForGapComplete = true;
-								fullest.addSample(sample);
-								iSample.remove();
-								
-								if (Scores.best == null
-										|| (fc.calculateFlowCellScore() > Scores.best.calculateFlowCellScore())) {
-									Scores.best = fc;
-									Scores.best.printFlowCell();
-									Scores.updateBest(fc);
-								}
-								// fc.printFlowCell();
-								// samplesToRemove.add(sample);
-							} else {
-								// System.out.printf("SAME  slot [%d : %.2f]-> [%d : %.2f]\n",emptiest.LaneNumber(),
-								// sample.Reads(), fullest.LaneNumber(),
-								// fullest.remainingCapacity());
+
+
+							//move
+							fullest.addSample(sample);
+							iSample.remove();
+							
+							if (Scores.best == null
+									|| (fc.calculateFlowCellScore() > Scores.best.calculateFlowCellScore())) {
+								Scores.best = fc;
+								Scores.best.printFlowCell();
+								Scores.updateBest(fc);
 							}
-	
+							
 						}
-	
-						// Iterator<Sample> remSam = samplesToRemove.iterator();
-						// while(remSam.hasNext()){
-						// emptiest.removeSample(remSam.next());
-						// }
-	
 					}
 				}
-
 			}
-
 		}
-		// attempt to find something from other lanes that will fill this gap
 
-		// if(Scores.best == null || fc.calculateFlowCellScore() >
-		// Scores.best.calculateFlowCellScore()){
-		// Scores.best = fc;
-		// }
 		return true;
 	}
 	
