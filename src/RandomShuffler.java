@@ -11,12 +11,6 @@ public class RandomShuffler {
 
 	public static boolean Shuffle(FlowCell fc, Display display) throws IOException {
 
-		int attempts = 0;
-		while (++attempts < fc.getLanes().size()) {
-			randomSwap(fc);
-
-		}
-
 
 		double rawScore = fc.calculateFlowCellScore();
 		double prevScore = rawScore;
@@ -27,36 +21,12 @@ public class RandomShuffler {
 		int polishIter = 0;
 		
 		double currScore = fc.calculateFlowCellScore();
-		while (currScore > prevScore) {
-			System.out.printf("P1: Going again as prevScore: %.2f > %.2f\n",
-					currScore, prevScore);
-			// add to score
-			
 
-			prevScore = currScore;
-//			Polish2(fc);
-			// if best, set it
-			if (Scores.best == null
-					|| (fc.calculateFlowCellScore() > Scores.best
-							.calculateFlowCellScore() && fc.NumNonEmptyLanes() <= Scores.best
-							.NumNonEmptyLanes())) {
-				Scores.best = fc;
-
-				Scores.best.printFlowCell();
-			}
-			currScore = fc.calculateFlowCellScore();
-			// fc.printFlowCell();
-			++polishIter;
-		}
 
 		prevScore = currScore;
 		display.updateMessage("Swapping");
 		PolishSwap(fc);
-		// fc.printFlowCell();
-		// PolishSwap(fc);
-		// PolishSwap(fc);
-		// PolishSwap(fc);
-		// PolishSwap(fc);
+
 
 		int swapIter = 0;
 		currScore = fc.calculateFlowCellScore();
