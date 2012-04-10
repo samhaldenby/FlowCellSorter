@@ -1,8 +1,10 @@
 import java.io.File;
 
 
-public class Preferences {
+public class PreferenceStore {
 	static private File currentDirectory = null;
+	public static String UserDir;
+	public static double PrefLaneCapacity;
 		
 		
 	public static void setWorkingDirectory(String dirName){

@@ -43,4 +43,8 @@ public class Sample {
 		barcoded_=barcoded;
 	}
 
+	public String print() {
+		return String.format("[%s-%s-%.2f-%d]", this.name_, this.barcode_, this.numReads_, this.pool_); 
+	}
+
 }

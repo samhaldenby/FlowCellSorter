@@ -19,7 +19,7 @@ public class FileChooser {
         JFileChooser chooser = new JFileChooser();
         
        
-        chooser.setCurrentDirectory(Preferences.CurrentDirectory());//Debug TODO: Change this in preferences
+        chooser.setCurrentDirectory(new File(PreferenceStore.UserDir));
         
 //        chooser.setAccessory(cBox);
 

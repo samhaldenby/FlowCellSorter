@@ -26,31 +26,33 @@ public class Display extends JFrame{
 	private ControlPanel controlPanel= null;
 	private FlowCellPanel flowCellPanel = null;
 	private MessagePanel messagePanel = null;
+	private int colourMode_ = Consts.COLOUR_BY_BARCODE;
 
 	Display(){
 		super(String.format("Flow Cell Sorter v%s",Consts.VERSION));
 		
 		setLayout(new BorderLayout());
 		
+
+		
 		//create panels
 		controlPanel = new ControlPanel(this);
 		
 		
-		flowCellPanel = new FlowCellPanel();
-		flowCellPanel.setBackground(Color.yellow.darker());
+		flowCellPanel = new FlowCellPanel(this);
+		flowCellPanel.setBackground(Color.gray.brighter());
 		
 		messagePanel = new MessagePanel();
 		
 		
 
 		
-		
 		//add panels to frame
 		add(controlPanel, BorderLayout.EAST);
 		add(flowCellPanel, BorderLayout.CENTER);
 		add(messagePanel, BorderLayout.SOUTH);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setResizable(false);
+//		this.setResizable(false);
 		
 		//get screen size
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -77,6 +79,15 @@ public class Display extends JFrame{
 	
 	public void updateMessage(String message){
 		messagePanel.updateMessage(message);
+	}
+
+	public void setColourMode(int colourMode) {
+		colourMode_ = colourMode;
+		
+	}
+
+	public int ColourMode() {
+		return colourMode_;
 	}
 	
 	

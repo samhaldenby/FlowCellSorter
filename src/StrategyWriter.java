@@ -13,7 +13,8 @@ public class StrategyWriter {
 		 for(Lane iLane : Scores.best.NonEmptyLanes()){
 //			 out.write("Lane " + Integer.toString(newLaneNumber));
 			 for(Sample iSample : iLane.getSamples()){
-				 String line = String.format("%d\t%s\t%s\t%.2f\t%s\n", newLaneNumber, iSample.Name(), (iSample.isBarcoded() ? iSample.Barcode() : ""), iSample.Reads(), (iSample.isPooled() ? Integer.toString(iSample.Pool()) : ""));
+				 System.out.println(iSample.print());
+				 String line = String.format("%d\t%s\t%s\t%.5f\t%s\n", newLaneNumber, iSample.Name(), (iSample.isBarcoded() ? iSample.Barcode() : ""), iSample.Reads(), (iSample.isPooled() ? Integer.toString(iSample.Pool()) : ""));
 				 
 				out.write(line);
 			 }

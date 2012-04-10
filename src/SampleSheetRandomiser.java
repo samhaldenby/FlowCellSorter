@@ -7,9 +7,10 @@ import java.util.Random;
 
 public class SampleSheetRandomiser {
 	
+	
 	private static int NUM_SAMPLES =1000;
 	private static int NUM_POOLS = NUM_SAMPLES;
-	private static float CHANCE_OF_POOLING=0.0f;
+	private static float CHANCE_OF_POOLING=0.1f;
 	
 	public static ArrayList<Sample> create() throws IOException{
 		ArrayList<Sample> samples = new ArrayList<Sample>();
@@ -83,7 +84,7 @@ public class SampleSheetRandomiser {
 			else if(rnd==3) num=0.33f;
 			else if(rnd==4) num=0.1f;
 			else if (rnd==5) num=0.75f;
-			num = r.nextFloat();	//comment this out if you want more realistic sample requirements			
+			num = r.nextFloat() *0.5f;	//comment this out if you want more realistic sample sizes			
 	
 			String sampleName = "S" + Integer.toString(s);
 			String barcode = barcodes.get((int)(Math.random()*24));
@@ -115,8 +116,9 @@ public class SampleSheetRandomiser {
 
 
 
-
-			
+			Sample sample = new Sample(sampleName,barcode, num, pool);
+			sample.setBarcoded(true);
+			System.out.printf("Sample: %s\n",sample.print());
 			samples.add(new Sample(sampleName,barcode,num, pool));
 			System.out.printf("num=%.2f\n",num);
 		}
