@@ -33,7 +33,6 @@ public class FlowCellPanel extends JPanel{
 						ArrayList<Lane> nonEmptyLanes = Scores.best.NonEmptyLanes();
 						int numLanes = nonEmptyLanes.size();
 						boolean drawBorders = (this.getHeight()/numLanes >=2);
-						System.out.printf("BORDERNUM: %.2f\n", this.getHeight()/(double)numLanes);
 						for(int l=0; l<numLanes; ++l){
 							
 							//for each sample, draw a wee box
@@ -47,7 +46,7 @@ public class FlowCellPanel extends JPanel{
 								g.setColor(new Color(sample.Barcode().hashCode()+ Integer.MAX_VALUE/2));
 			//					g.setColor(new Color((int)Math.pow(sample.Pool(),2.5)+ Integer.MAX_VALUE/2));
 			//					g.setColor(new Color((int)sample.Pool()*5000+ Integer.MAX_VALUE/2));
-								double len = (sample.Reads() * this.getWidth()*0.99d);
+								double len = ((sample.Reads() / nonEmptyLanes.get(l).Capacity()) * this.getWidth()*0.99d);
 								g.fillRect((int)currPos, (this.getHeight()/numLanes)*l + this.getY()+30, (int)len, this.getHeight()/numLanes);
 								if(drawBorders){
 									g.setColor(Color.BLACK);
@@ -82,9 +81,9 @@ public class FlowCellPanel extends JPanel{
 								Sample sample = iSample.next();
 			//					System.out.printf("%s = %d\n",sample.Barcode(), sample.Barcode().hashCode());
 //								g.setColor(new Color(sample.Barcode().hashCode()+ Integer.MAX_VALUE/2));
-			//					g.setColor(new Color((int)Math.pow(sample.Pool(),2.5)+ Integer.MAX_VALUE/2));
-								g.setColor(new Color((int)sample.Pool()*5000+ Integer.MAX_VALUE/2));
-								double len = (sample.Reads() * this.getWidth()*0.99d);
+								g.setColor(new Color((int)Math.pow(sample.Pool(),2.5)+ Integer.MAX_VALUE/2));
+//								g.setColor(new Color((int)sample.Pool()*5000+ Integer.MAX_VALUE/2));
+								double len = ((sample.Reads() / nonEmptyLanes.get(l).Capacity()) * this.getWidth()*0.99d);
 								g.fillRect((int)currPos, (this.getHeight()/numLanes)*l + this.getY()+30, (int)len, this.getHeight()/numLanes);
 								
 								if(drawBorders){

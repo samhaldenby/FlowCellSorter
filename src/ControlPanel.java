@@ -97,7 +97,7 @@ public class ControlPanel extends JPanel{
             {
                 //Execute when button is pressed
                 System.out.println("You clicked the load button");
-                File input = FileChooser.Choose("Open","Select samplesheet to open");
+                File input = FileChooser.Choose("Open","Select samplesheet to open", true);
                 if(input!=null){
                 	 try {
      					Storage.samples = SheetReader.read(input.toString());
@@ -126,7 +126,7 @@ public class ControlPanel extends JPanel{
                 //Execute when button is pressed
                 System.out.println("You clicked the save button");
                 
-                File output = FileChooser.Choose("Save","Select output file");
+                File output = FileChooser.Choose("Save","Select output file", false);
                 if (output!=null){
 	                try {
 						StrategyWriter.write(output.toString());

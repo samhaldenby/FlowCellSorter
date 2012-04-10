@@ -16,21 +16,25 @@ public class Main {
 	public static void main(String[] args) throws IOException {
 		
 		//preferences
-		Preferences prefs = Preferences.userNodeForPackage(Main.class);
-		prefs.put("userDir", "/home/sh695/Documents/Java/FlowCellSorter/");
-		PreferenceStore.UserDir = prefs.get("userDir","/");
-		PreferenceStore.PrefLaneCapacity = prefs.getDouble("prefLaneCapacity",1.d);
+		PreferenceStore.LoadPreferences();
+//		Preferences prefs = Preferences.userNodeForPackage(Main.class);
+//		prefs.put("userLoadDir", "/home/sh695/Documents/Java/FlowCellSorter/");
+//		prefs.put("userSaveDir", "/home/sh695/Documents/Java/FlowCellSorter/");
+//		PreferenceStore.LoadDirectory(prefs.get("userLoadDir","/"));
+//		PreferenceStore.SaveDirectory(prefs.get("userSaveDir","/"));
+//		PreferenceStore.PrefLaneCapacity = prefs.getDouble("prefLaneCapacity",1.d);
 		
 		//test pathing
-		File test = new File("/home/sh695/Documents/Java/FlowCellSorter/test.txt");
-		System.out.printf("Absolute Path: %s\n", test.getParent());
-		
-		
-		System.out.printf("UserDir = %s\n", PreferenceStore.UserDir);
-		System.out.printf("UserDir = %.2f\n", PreferenceStore.PrefLaneCapacity);
-//		System.in.read();
+//		File test = new File("/home/sh695/Documents/Java/FlowCellSorter/test.txt");
+//		System.out.printf("Absolute Path: %s\n", test.getParent());
+//		
+//		
+//		System.out.printf("UserDir = %s\n", PreferenceStore.UserDir);
+//		System.out.printf("UserDir = %.2f\n", PreferenceStore.PrefLaneCapacity);
+////		System.in.read();
 		//set directory (TODO: This is only for debugging purposes)
-		PreferenceStore.setWorkingDirectory( "/home/sh695/Documents/Java/FlowCellSorter");
+//		PreferenceStore.setWorkingLoadDirectory( "/home/sh695/Documents/Java/FlowCellSorter");
+//		PreferenceStore.setWorkingSaveDirectory( "/home/sh695/Documents/Java/FlowCellSorter");
 
 		Display display = new Display();
 		

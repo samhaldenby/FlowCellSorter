@@ -7,7 +7,7 @@ import javax.swing.JFrame;
 
 public class FileChooser {
 	
-	public static File Choose(String approveLabel, String header)
+	public static File Choose(String approveLabel, String header, boolean loader)
     {
 		
 		
@@ -18,8 +18,12 @@ public class FileChooser {
         //create file chooser
         JFileChooser chooser = new JFileChooser();
         
-       
-        chooser.setCurrentDirectory(new File(PreferenceStore.UserDir));
+       if(loader){
+           chooser.setCurrentDirectory(PreferenceStore.CurrentLoadDirectory());
+       } else {
+    	   chooser.setCurrentDirectory(PreferenceStore.CurrentSaveDirectory());
+       }
+ 
         
 //        chooser.setAccessory(cBox);
 
@@ -50,6 +54,16 @@ public class FileChooser {
         if (result == JFileChooser.APPROVE_OPTION)
         {
 //            currDir = chooser.getCurrentDirectory();
+        	
+        	//update file selection in preferences
+        	if(loader){
+        		PreferenceStore.LoadDirectory = new File(chooser.getSelectedFile().getParent());
+        	} else {
+        		PreferenceStore.SaveDirectory = new File(chooser.getSelectedFile().getParent());
+        	}
+        	
+        	PreferenceStore.SavePreferences();
+        	
             frame.setVisible(false);
             frame.dispose();
             frame.invalidate();
