@@ -1,7 +1,10 @@
 import java.util.ArrayList;
 import java.util.Iterator;
 
-
+/** Class representing a grouping of samples as opposed to an individual one
+*
+* @author Sam Haldenby
+*/
 public class SampleBundle {
 	private ArrayList<Sample> samples_;
 	private double size_;

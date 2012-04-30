@@ -2,7 +2,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.prefs.Preferences;
 
-
+/** Main class
+*
+* @author Sam Haldenby
+*/
 public class Main {
 
 	final static int NUM_OF_FCS=2;
@@ -41,18 +44,6 @@ public class Main {
 		Scores.display_ = display;
 		DisplayUpdater du = new DisplayUpdater(display);
 		new Thread(du).start();
-		
-
-		
-	
-//		display.disableLoadSave();
-//		FlowCell flowCell = new FlowCell(LANE_CAPACITY, display);
-
-//		//add samples
-//		flowCell.initialAddSamples(samples);
-//		RandomShuffler.Shuffle(flowCell);
-//		display.enableLoadSave();
-//		System.out.println("All done!");
 
 	}
 

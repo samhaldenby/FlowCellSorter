@@ -6,6 +6,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
+/** Contains information regarding all lanes/samples/etc
+*
+* @author Sam Haldenby
+*/
 public class FlowCell {
 	private int numLanes_;
 	private ArrayList<Lane> lanes_ = new ArrayList<Lane>();

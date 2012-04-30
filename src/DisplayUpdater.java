@@ -1,4 +1,7 @@
-
+/** Utilised for updating GUI at regular intervals
+*
+* @author Sam Haldenby
+*/
 public class DisplayUpdater implements Runnable{
 
 	private Display d = null;

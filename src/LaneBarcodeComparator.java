@@ -1,6 +1,9 @@
 import java.util.Comparator;
 
-
+/** Comparator for comparing barcode sequences
+*
+* @author Sam Haldenby
+*/
 public class LaneBarcodeComparator implements Comparator<Sample> {
 
 	@Override

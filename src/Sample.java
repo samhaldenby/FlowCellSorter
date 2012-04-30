@@ -1,4 +1,7 @@
-
+/** Class representing a single sample of a lane
+*
+* @author Sam Haldenby
+*/
 public class Sample {
 	
 	private String name_;

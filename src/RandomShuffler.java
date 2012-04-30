@@ -4,6 +4,10 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.ListIterator;
 
+/** Static class responsible for the shuffling/sorting of samples
+*
+* @author Sam Haldenby
+*/
 public class RandomShuffler {
 
 	private static double INIT_THRESHOLD = 0.99;

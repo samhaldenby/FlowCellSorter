@@ -8,7 +8,10 @@ import java.util.Map;
 import java.util.Set;
 
 
-
+/** Class representing a single lane of a 'flowcell'
+*
+* @author Sam Haldenby
+*/
 public class Lane {
 	private int laneNumber_;
 	private double capacity_;

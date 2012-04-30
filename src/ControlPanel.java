@@ -15,13 +15,14 @@ import javax.swing.JTextField;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 
-
+/** GUI side-panel where controls and stats are displayed
+*
+* @author Sam Haldenby
+*/
 public class ControlPanel extends JPanel{
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 8523461652875295421L;
 
+	private static final long serialVersionUID = 8523461652875295421L;
+	
 	private Display display_;
 	
 	
@@ -178,6 +179,11 @@ public class ControlPanel extends JPanel{
 		numSamplesText = new JTextField();
 		freeLabel = new JLabel("% Free");
 		freeSpaceText = new JTextField();
+		
+		numLanesText.setEditable(false);
+		numSamplesText.setEditable(false);
+		freeSpaceText.setEditable(false);
+		
 //		laneLabel.setBackground(Color.gray);
 		
 		statsPanel.setLayout(new GridLayout(4,2));

@@ -1,6 +1,9 @@
 
 
-
+/** Static class storing information on best flowcell configuration
+*
+* @author Sam Haldenby
+*/
 public class Scores {
 	public static FlowCell best = null;
 	

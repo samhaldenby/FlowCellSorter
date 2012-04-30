@@ -4,7 +4,10 @@ import java.io.File;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 
-
+/** Static class for file selection operations
+*
+* @author Sam Haldenby
+*/
 public class FileChooser {
 	
 	public static File Choose(String approveLabel, String header, boolean loader)

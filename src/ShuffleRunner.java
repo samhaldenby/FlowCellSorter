@@ -1,6 +1,9 @@
 import java.io.IOException;
 
-
+/** Classs used to invoke RandomShuffler in its own thread
+*
+* @author Sam Haldenby
+*/
 public class ShuffleRunner implements Runnable{
 
 	Display display_ = null;

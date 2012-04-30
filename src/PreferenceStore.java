@@ -1,7 +1,10 @@
 import java.io.File;
 import java.util.prefs.Preferences;
 
-
+/** Static class for storing user preferences at runtime
+*
+* @author Sam Haldenby
+*/
 public class PreferenceStore {
 	static public File LoadDirectory = null;
 	static public File SaveDirectory = null;

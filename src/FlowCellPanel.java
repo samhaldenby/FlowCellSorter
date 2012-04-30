@@ -5,12 +5,12 @@ import java.util.Iterator;
 
 import javax.swing.JPanel;
 
-
+/** GUI component used for displaying image of flowcell
+*
+* @author Sam Haldenby
+*/
 public class FlowCellPanel extends JPanel{
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	
 	private Display display_;

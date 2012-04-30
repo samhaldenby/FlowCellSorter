@@ -4,7 +4,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
 
-
+/** Static class for randomly generating a test samplesheet at runtime. For debugging purposes
+*
+* @author Sam Haldenby
+*/
 public class SampleSheetRandomiser {
 	
 	

@@ -10,7 +10,10 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.border.Border;
 
-
+/** GUI component used for displaying progress information
+*
+* @author Sam Haldenby
+*/
 public class MessagePanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 	

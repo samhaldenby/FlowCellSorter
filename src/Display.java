@@ -14,12 +14,12 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-
+/** Main GUI component
+*
+* @author Sam Haldenby
+*/
 public class Display extends JFrame{
 
-	/**
-	 * 
-	 */
 	
 	private static int FC_WIDTH=1000;
 	private static int FC_LENGTH=1000;

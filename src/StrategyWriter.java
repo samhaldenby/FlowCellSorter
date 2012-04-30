@@ -2,7 +2,10 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 
-
+/** Class for exporting results
+*
+* @author Sam Haldenby
+*/
 public class StrategyWriter {
 
 	public static void write(String fileName) throws IOException {
