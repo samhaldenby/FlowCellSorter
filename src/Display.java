@@ -4,6 +4,8 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -52,6 +54,15 @@ public class Display extends JFrame{
 		add(flowCellPanel, BorderLayout.CENTER);
 		add(messagePanel, BorderLayout.SOUTH);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		this.addWindowListener(new WindowAdapter(){
+			public void windowClosing(WindowEvent e){
+				System.out.println("EXITING NOW!");
+				Scores.reset();
+			}
+		});
+		
+		
 //		this.setResizable(false);
 		
 		//get screen size

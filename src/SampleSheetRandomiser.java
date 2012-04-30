@@ -8,7 +8,7 @@ import java.util.Random;
 public class SampleSheetRandomiser {
 	
 	
-	private static int NUM_SAMPLES =1000;
+	private static int NUM_SAMPLES =400;
 	private static int NUM_POOLS = NUM_SAMPLES;
 	private static float CHANCE_OF_POOLING=0.1f;
 	

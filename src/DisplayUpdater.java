@@ -16,9 +16,17 @@ public class DisplayUpdater implements Runnable{
 			}
 //			System.out.printf("DisplayUpdater: Loop on EDT? %s\n",javax.swing.SwingUtilities.isEventDispatchThread());
 			if(Scores.best!=null){
-				d.repaint();
-				d.update();
+				javax.swing.SwingUtilities.invokeLater(new Runnable() {
+				      public void run() {
+				    	d.repaint();
+				        d.update();  // access result and update JList
+				      }
+				    } );
 			}
+
+//				d.repaint();
+//				d.update();
+			
 		}
 		
 	}

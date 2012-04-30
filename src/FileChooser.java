@@ -67,8 +67,13 @@ public class FileChooser {
             frame.setVisible(false);
             frame.dispose();
             frame.invalidate();
-
-            return chooser.getSelectedFile();
+            
+            //check a file was selected!
+            if(chooser.getSelectedFile().toString().isEmpty()){
+            	return null;
+            } else {
+            	return chooser.getSelectedFile();
+            }
 
         } else
         {
