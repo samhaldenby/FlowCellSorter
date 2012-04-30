@@ -1,6 +1,5 @@
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -15,23 +14,24 @@ public class FlowCell {
 	private ArrayList<Lane> lanes_ = new ArrayList<Lane>();
 	private double capacity_;
 	private double capacityPerLane_;
-	private double maxScore_;
 
+	
+	/** Constructor
+	 * 
+	 * @param capacityPerLane		Maximum capacity per lane
+	 */
 	public FlowCell(double capacityPerLane) {
-		// announce
-		// System.out.printf("Creating FlowCell (lanes=%d, capacityPerLane=%.2f)\n",numLanes,
-		// capacityPerLane);
-//		numLanes_ = numLanes;
 		capacityPerLane_ = capacityPerLane;
-
-//		capacity_ = numLanes_ * capacityPerLane;
-
-//		// create lanes
-//		for (int l = 0; l < numLanes; ++l) {
-//			lanes_.add(new Lane(l, capacityPerLane));
-//		}
 	}
 
+	
+	/** Adds samples to lanes of flowcell
+	 * 
+	 * @throws IOException 		
+	 * @param samples		List of samples to add
+	 * @param display		Reference to main display
+	 * @return	Success/failure
+	 */
 	public boolean initialAddSamples(ArrayList<Sample> samples, Display display) throws IOException {
 		//DEBUG
 		
@@ -39,7 +39,7 @@ public class FlowCell {
 		HashMap<Integer,SampleBundle> pools = new HashMap<Integer,SampleBundle>();
 		ArrayList<Sample> unpooled = new ArrayList<Sample>();
 		
-		//for each sample, assign to pool
+		//for each sample, assign to correct pool (or unpooled, if no pool)
 		for(Sample iSample : samples){
 			if(iSample.isPooled()){
 				if(!pools.containsKey(iSample.Pool())){
@@ -58,7 +58,6 @@ public class FlowCell {
 		}
 		
 		//now add pools to lanes
-		
 		int laneNum=0;
 		lanes_ = new ArrayList<Lane>();
 		for(Map.Entry<Integer, SampleBundle> iEntry : pools.entrySet()){
@@ -73,44 +72,6 @@ public class FlowCell {
 			lanes_.get(laneNum).addSample(iSample);
 			++laneNum;
 		}
-		
-			
-			
-			
-			
-//			Iterator<Sample> iSample = samples.iterator();
-//		int laneNum=0;
-//		while (iSample.hasNext()) {
-//			Sample sample = iSample.next();
-//			lanes_.add(new Lane(laneNum, capacityPerLane_));
-//			lanes_.get(laneNum).addSample(sample);
-//			++laneNum;
-//		}
-		//END DEBUG
-//		Iterator<Sample> iSample = samples.iterator();
-//		while (iSample.hasNext()) {
-//			Sample sample = iSample.next();
-//			int randomLaneNumber = (int) (Math.random() * numLanes_);
-//			Lane targetLane = lanes_.get(randomLaneNumber);
-//			// check that this lane doesn't already contain a sample with the
-//			// same barcode
-//			int additionAttempts = 0;
-//			while (targetLane.hasBarcode(sample.Barcode())) {
-//				if (++additionAttempts > 100) {
-//					this.clear();
-//					Scores.initFail+=1;
-//					return false;
-//				}
-//				randomLaneNumber = (int) (Math.random() * numLanes_);
-//				targetLane = lanes_.get(randomLaneNumber);
-//			}
-//
-//			targetLane.addSample(sample);
-//		}
-		
-		
-		//calculate max score
-		maxScore_ = this.calculateMaxPossibleScore();
 		
 		//Finally validate flow cell
 		boolean overfill = false;
@@ -129,181 +90,79 @@ public class FlowCell {
 				errorMessage = errorMessage + " [" + Integer.toString(i) + "]";
 			}
 			display.updateMessage(errorMessage);
-			
-//			System.out.printf("Error: Lane %d is overfilled\n", iLane.LaneNumber());
 			return false;
 		}
-//		System.in.read();
+
 		return true;
 	}
 
 
+	
+	/** Adds an empty lane to flowcell
+	 *
+	 */
 	public void addLane() {
 		lanes_.add(new Lane(numLanes_ - 1, capacityPerLane_));
 		capacity_ += capacityPerLane_;
 		numLanes_++;
 	}
 
-	public double currentFillLevel() {
-		double val=0.00000d;
-		Iterator<Lane> iLane = lanes_.iterator();
-		while (iLane.hasNext()) {
-			val += iLane.next().currentFillLevel();
-		}
-
-		return val;
-	}
-
-	public double Capacity() {
-		return capacity_;
-	}
-
+	
+	
+	/** Get reference to a particular lane
+	 * 
+	 * @param number		Number of lane to be retrieved
+	 * @return	Requested lane
+	 */
 	public Lane Lane(int number) {
 		return lanes_.get(number);
 	}
 
+	
+	
+	/** Get number of lanes on flowcell
+	 *
+	 * @return	Number of lanes
+	 */
 	public int NumLanes() {
 		return numLanes_;
 	}
 
-	public ArrayList<Lane> underFilled() {
-		ArrayList<Lane> underFilledLanes = new ArrayList<Lane>();
-		Iterator<Lane> iLane = lanes_.iterator();
-		while (iLane.hasNext()) {
-			Lane l = iLane.next();
-			if (l.remainingCapacity() > 0) {
-				underFilledLanes.add(l);
-			}
-		}
-		return underFilledLanes;
-	}
-
-	public ArrayList<Lane> overFilled() {
-		ArrayList<Lane> overFilledLanes = new ArrayList<Lane>();
-		Iterator<Lane> iLane = lanes_.iterator();
-		while (iLane.hasNext()) {
-			Lane l = iLane.next();
-			if (l.remainingCapacity() < 0) {
-				// System.out.printf("Remaining capacity = %.2f -> adding to overFilled\n",l.currentFillLevel());
-				overFilledLanes.add(l);
-			}
-		}
-		return overFilledLanes;
-	}
-
-	public Lane getEmptiestLane() {
-		Lane lane = lanes_.get(0);
-		double lowest = lanes_.get(0).currentFillLevel();
-		Iterator<Lane> iLane = lanes_.iterator();
-		while (iLane.hasNext()) {
-			Lane currLane = iLane.next();
-			if (currLane.currentFillLevel() < lowest) {
-				lowest = currLane.currentFillLevel();
-				lane = currLane;
-			}
-		}
-
-		return lane;
-	}
-
-	public void printFlowCell() {
-		ArrayList<Lane> sortedLanes = lanes_;
-		Collections.sort(sortedLanes, new LaneFullnessComparator());
-		Iterator<Lane> iLane = sortedLanes.iterator();
-		double totScore = 0.0;
-		while (iLane.hasNext()) {
-			Lane currLane = iLane.next();
-			if(!currLane.isEmpty())
-			{
 
 
-				System.out.printf("%.6f\t",(currLane.currentFillLevel() / currLane.Capacity()) * 100.0);
-				currLane.printLane();
-				System.out.println();
-			}
-			
-			
-
-		
-
-		}
-		
-
-		double score = calculateFlowCellScore();
-//		double score2 = calculateFlowCellScoreBak();
-
-		System.out.printf("\nTotal Score: %.2f vs %.2f (of %.2f (%.2f%%)\n", score, (Scores.best==null ? 0.0 : Scores.best.calculateFlowCellScore()), this.maxScore_, 100.0 * (score/this.maxScore_));
-//		System.out.printf("\nTotal Score: %.2f of %.2f (%.2f%%)\n", score2,this.calculateMaxPossibleScoreBak(), 100.0 * (score2/this.calculateMaxPossibleScoreBak()));
-	}
-
+	/** Calculates score for flowcell based on how good configuration is
+	 *
+	 * @return	Flowcell score
+	 */
 	public double calculateFlowCellScore() {
 		Iterator<Lane> iLane = lanes_.iterator();
 		double totScore = 0.0;
 		while (iLane.hasNext()) {
 			Lane currLane = iLane.next();
-//			if (!currLane.isEmpty()) {
-				double score = Math.pow(100.0 - ((currLane.currentFillLevel() / currLane.Capacity()) * 100), 2);
-						
-				totScore += score;
-//				System.out.printf("%.2f + ", score);
-
-//			}
-
+			double score = Math.pow(100.0 - ((currLane.currentFillLevel() / currLane.Capacity()) * 100), 2);			
+			totScore += score;
 		}
-//		System.out.printf(" TotScore = %.2f\n", totScore);
+
 
 		return totScore/(double)(lanes_.size());///Math.pow(this.NumNonEmptyLanes(),2);
 	}
 	
-	public double calculateFlowCellScorePercent() {
-		Iterator<Lane> iLane = lanes_.iterator();
-		double totScore = 0.0;
-		int numLanes = 0;
-		while (iLane.hasNext()) {
-			Lane currLane = iLane.next();
-			if (!currLane.isEmpty()) {
-				totScore+= currLane.currentFillLevel();
-				numLanes++;
-						
 
-//				System.out.printf("%.2f + ", score);
 
-			}
-
-		}
-//		System.out.printf(" TotScore = %.2f\n", totScore);
-
-		return totScore/(double)numLanes;
-	}
-
+	/** Gets a reference to list of all lanes on flowcell
+	 * 
+	 * @return	Reference to list of lanes
+	 */
 	public ArrayList<Lane> getLanes() {
 		return lanes_;
 	}
 	
-	public double calculateMaxPossibleScoreBak(){
-		double totalSampleSize = this.currentFillLevel();
-		int wholeNumber = (int) totalSampleSize;
-//		System.out.println("Calculating max score");
-//		System.out.printf("TotalSize: %.2f  ->  %d\n",totalSampleSize, wholeNumber);
-		double remainder = 100.0 * (1.0 - (totalSampleSize - wholeNumber));
-		double maxScore = Math.pow(remainder, 2);
-//		System.out.printf("MaxScore: %.2f\n", maxScore);
-		
-		return maxScore;
-	}
-	
-	public double calculateMaxPossibleScore(){
-		double totalSampleSize = this.currentFillLevel();
-		int wholeNumber = (int) totalSampleSize;
-//		System.out.println("Calculating max score");
-//		System.out.printf("TotalSize: %.2f  ->  %d\n",totalSampleSize, wholeNumber);
-		double remainder = totalSampleSize - wholeNumber;
-		double maxScore = (wholeNumber + remainder)/(wholeNumber+1);
-//		System.out.printf("MaxScore: %.2f\n", maxScore);
-		
-		return maxScore;
-	}
 
+
+	/** Gets the number of non-empty lanes on the flowcell
+	 * 
+	 * @return	Number of non-empty lanes
+	 */
 	public int NumNonEmptyLanes() {
 		int nonEmptyLanes = 0;
 		Iterator<Lane> iLane = lanes_.iterator();
@@ -315,6 +174,12 @@ public class FlowCell {
 		return nonEmptyLanes;
 	}
 
+	
+	
+	/** Gets a list of references to non-empty lanes on the flowcell
+	 * 
+	 * @return	List of references to non-empty lanes
+	 */
 	public ArrayList<Lane> NonEmptyLanes() {
 		ArrayList<Lane> nonEmptyLanes = new ArrayList<Lane>();
 		Iterator<Lane> iLane = lanes_.iterator();
@@ -327,6 +192,12 @@ public class FlowCell {
 		return nonEmptyLanes;
 	}
 
+	
+	
+	/** Gets how many samples are loaded on flowcell
+	 * 
+	 * @return	Total number of samples
+	 */
 	public int NumSamples() {
 		int lanes = 0;
 		for(Lane iLane : lanes_){
@@ -335,7 +206,13 @@ public class FlowCell {
 		return lanes;
 	}
 
-	public double getFreeSpace() {
+	
+	
+	/** Gets how much free space there is on flowcell
+	 * 
+	 * @return	Percentage free space on flowcell
+	 */
+	public double FreeSpace() {
 		double totFree=0.0d;
 		double totSpace = 0.0d;
 		for(Lane iLane : lanes_){

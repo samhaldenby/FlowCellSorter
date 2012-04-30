@@ -47,7 +47,7 @@ public class RandomShuffler {
 							.calculateFlowCellScore() && fc.NumNonEmptyLanes() <= Scores.best
 							.NumNonEmptyLanes())) {
 				Scores.best = fc;
-				Scores.best.printFlowCell();
+//				Scores.best.printFlowCell();
 			}
 			currScore = fc.calculateFlowCellScore();
 //			fc.printFlowCell();
@@ -57,7 +57,7 @@ public class RandomShuffler {
 		prevScore = currScore;
 		display.updateMessage("Polishing");
 		Polish(fc);
-		 fc.printFlowCell();
+//		 fc.printFlowCell();
 		polishIter = 0;
 		currScore = fc.calculateFlowCellScore();
 		while (currScore > prevScore) {
@@ -73,7 +73,7 @@ public class RandomShuffler {
 							.calculateFlowCellScore() && fc.NumNonEmptyLanes() <= Scores.best
 							.NumNonEmptyLanes())) {
 				Scores.best = fc;
-				Scores.best.printFlowCell();
+//				Scores.best.printFlowCell();
 			}
 			currScore = fc.calculateFlowCellScore();
 			// fc.printFlowCell();
@@ -100,7 +100,7 @@ public class RandomShuffler {
 							.calculateFlowCellScore() && fc.NumNonEmptyLanes() <= Scores.best
 							.NumNonEmptyLanes())) {
 				Scores.best = fc;
-				Scores.best.printFlowCell();
+//				Scores.best.printFlowCell();
 			}
 
 			// fc.printFlowCell();
@@ -197,7 +197,7 @@ public class RandomShuffler {
 							if (Scores.best == null
 									|| (fc.calculateFlowCellScore() > Scores.best.calculateFlowCellScore())) {
 								Scores.best = fc;
-								Scores.best.printFlowCell();
+//								Scores.best.printFlowCell();
 								Scores.updateBest(fc);
 							}
 							
@@ -369,7 +369,7 @@ public class RandomShuffler {
 		if (Scores.best == null
 				|| (fc.calculateFlowCellScore() > Scores.best.calculateFlowCellScore())) {
 			Scores.best = fc;
-			Scores.best.printFlowCell();
+//			Scores.best.printFlowCell();
 			Scores.updateBest(fc);
 		}
 		return true;

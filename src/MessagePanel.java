@@ -1,14 +1,8 @@
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
-
-import javax.swing.BorderFactory;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.JTextPane;
-import javax.swing.border.Border;
+
 
 /** GUI component used for displaying progress information
 *
@@ -17,7 +11,6 @@ import javax.swing.border.Border;
 public class MessagePanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 	
-	private JScrollPane scrollPane_;
 	private JTextField textBox_;
 	public MessagePanel(){
 		

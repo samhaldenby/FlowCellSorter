@@ -2,17 +2,11 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.ArrayList;
-import java.util.Iterator;
 
-import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 
 /** Main GUI component
 *
@@ -21,8 +15,6 @@ import javax.swing.JPanel;
 public class Display extends JFrame{
 
 	
-	private static int FC_WIDTH=1000;
-	private static int FC_LENGTH=1000;
 	private static final long serialVersionUID = 1L;
 
 	private ControlPanel controlPanel= null;

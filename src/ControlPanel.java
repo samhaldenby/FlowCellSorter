@@ -13,7 +13,6 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.border.BevelBorder;
-import javax.swing.border.Border;
 
 /** GUI side-panel where controls and stats are displayed
 *
@@ -264,7 +263,7 @@ public class ControlPanel extends JPanel{
 		numLanesText.setText(Integer.toString(Scores.best.NumNonEmptyLanes()));
 		numSamplesText.setText(Integer.toString(Scores.best.NumSamples()));
 		
-		double result = Scores.best.getFreeSpace() * 10;
+		double result = Scores.best.FreeSpace() * 10;
 		result = Math.round(result);
 		result = result / 10;
 		freeSpaceText.setText(Double.toString(result));

@@ -65,7 +65,7 @@ public class SheetReader {
 		}
 		System.out.printf("There are %d samples loaded!\n", samples.size());
 		
-		samples = SampleSheetRandomiser.create(); //TODO : Remove this - debug purposes only!
+//		samples = SampleSheetRandomiser.create(); //TODO : Remove this - debug purposes only!
 		return samples;
 	}
 	

@@ -13,10 +13,6 @@ public class FileChooser {
 	public static File Choose(String approveLabel, String header, boolean loader)
     {
 		
-		
-
-        //prepare return data
-        File file;
 
         //create file chooser
         JFileChooser chooser = new JFileChooser();
