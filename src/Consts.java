@@ -10,7 +10,7 @@ public class Consts {
 	protected static final double LANE_CAPACITY = 1.01d;
 	
 	/** Software version number */
-	public static final String VERSION = "0.4.5";
+	public static final String VERSION = "0.4.7";
 
 	/** 'Enumerated' values for determining lane colouring options */
 	public static final int COLOUR_BY_BARCODE = 0;

@@ -107,9 +107,11 @@ public class ControlPanel extends JPanel{
      					//reset variable
      					numLanesText.setText("NA");
      					if(Storage.samples==null){
+     						Storage.originalNumberOfSamples=0;
      						numSamplesText.setText("NA");
      					}else{
      						numSamplesText.setText(Integer.toString(Storage.samples.size()));
+     						Storage.originalNumberOfSamples=Storage.samples.size();
      					}
      					freeSpaceText.setText("NA");
      					Scores.best = null;

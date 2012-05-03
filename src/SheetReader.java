@@ -84,15 +84,10 @@ public class SheetReader {
 					//if this barcode hasn't been found yet, add it
 					if(!barcodeCounts.containsKey(s.Barcode())){
 						barcodeCounts.put(s.Barcode(), 1);
+					//otherwise, if it already exists then this is the second occurence of that barcode in the same pool. Not good!
 					} else {
-//						int currentCountForThisBarcode = barcodeCounts.get(s.Barcode()) + 1;
-//						if(currentCountForThisBarcode>1){
-							//Too many barcodes in this pool! Abort
-							display.updateMessage(String.format("Error: Barcode '%s' appears multiple times in pool %d",s.Barcode(), pn));	
-							return null;
-//						} else {
-//							barcodeCounts.put(s.Barcode(), currentCountForThisBarcode);
-//						}
+						display.updateMessage(String.format("Error: Barcode '%s' appears multiple times in pool %d",s.Barcode(), pn));	
+						return null;
 					}
 				}
 			}

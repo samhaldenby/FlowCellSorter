@@ -37,7 +37,6 @@ public class ShuffleRunner implements Runnable{
 				e.printStackTrace();
 			}
 		
-			
 			display_.enableLoadSave();
 		}
 		

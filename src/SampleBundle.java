@@ -19,7 +19,7 @@ public class SampleBundle {
 		while(iSample.hasNext()){
 			Sample sample = iSample.next();
 			size_+=sample.Reads();
-			bundleHash_ |=sample.Barcode().hashCode();
+			bundleHash_ |=sample.Barcode().hashCode();	//TODO: I don't really remember what I've done this for... Sorry
 		}
 		
 		

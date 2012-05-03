@@ -6,5 +6,6 @@ import java.util.ArrayList;
 */
 public class Storage {
 	public static ArrayList<Sample> samples = null;
+	public static int originalNumberOfSamples = 0;
 	public static FlowCell flowCell = null;
 }

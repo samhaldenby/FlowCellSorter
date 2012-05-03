@@ -115,6 +115,12 @@ public class RandomShuffler {
 		
 		//sort best
 		Collections.sort(Scores.best.getLanes(), new LaneFullnessComparator());
+		
+		if(!ResultsValidator.Validate(fc)){
+			display.updateMessage("FATAL ERROR: See error log");
+			return false;
+		}
+		
 		display.updateMessage("Done");
 		return true;
 	}
