@@ -100,11 +100,17 @@ public class ControlPanel extends JPanel{
                 File input = FileChooser.Choose("Open","Select samplesheet to open", true);
                 if(input!=null){
                 	 try {
-     					Storage.samples = SheetReader.read(input.toString());
+     					Storage.samples = SheetReader.read(input.toString(), display_);
      					
+     					//validate Samples
+
      					//reset variable
      					numLanesText.setText("NA");
-     					numSamplesText.setText(Integer.toString(Storage.samples.size()));
+     					if(Storage.samples==null){
+     						numSamplesText.setText("NA");
+     					}else{
+     						numSamplesText.setText(Integer.toString(Storage.samples.size()));
+     					}
      					freeSpaceText.setText("NA");
      					Scores.best = null;
      				} catch (IOException e1) {
